@@ -3,4 +3,10 @@ streamlit
 matplotlib
 seaborn
 jupyter
-
+opencv-python
+graphviz
+tqdm
+scikit-learn
+imageio
+pillow
+joblib
