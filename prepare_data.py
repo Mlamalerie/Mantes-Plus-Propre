@@ -1,17 +1,13 @@
 from sklearn.model_selection import train_test_split
 import os
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import json
 import shutil
 from tqdm import tqdm
 from datetime import datetime
-from joblib import Parallel, delayed
-from concurrent.futures import ThreadPoolExecutor
+from PIL import Image
 from joblib import Parallel, delayed
 from config import *
+import yaml
 
 
 
@@ -70,15 +66,18 @@ def process_image_group(object_group, new_dataset_path):
     if not os.path.exists(os.path.dirname(new_label_path)):
         os.makedirs(os.path.dirname(new_label_path))
 
-    #print(" > new_label_path: ", new_label_path)
+    # print(" > new_label_path: ", new_label_path)
     with open(new_label_path, "w") as f:
         for label in label_matrix:
-            f.write("{} {} {} {} {}\n".format(int(label[0]), float(label[1]), float(label[2]), float(label[3]), float(label[4])))
+            f.write("{} {} {} {} {}\n".format(int(label[0]), float(label[1]), float(label[2]), float(label[3]),
+                                              float(label[4])))
+
 
 def process_images(df, new_dataset_path, df_name):
     object_groups = df.groupby("path")
     for object_group in tqdm(object_groups, desc=f"Processing {df_name} dataset"):
         process_image_group(object_group, os.path.join(new_dataset_path, df_name))
+
 
 def process_images_parallel(df, new_dataset_path, df_name, n_jobs=-1):
     # create folders
@@ -88,9 +87,12 @@ def process_images_parallel(df, new_dataset_path, df_name, n_jobs=-1):
         os.makedirs(os.path.join(new_dataset_path, df_name, "labels"))
 
     object_groups = df.groupby("path")
-    Parallel(n_jobs=n_jobs)(delayed(process_image_group)(object_group, os.path.join(new_dataset_path, df_name)) for object_group in tqdm(object_groups, desc=f"Processing {df_name} dataset"))
+    Parallel(n_jobs=n_jobs)(
+        delayed(process_image_group)(object_group, os.path.join(new_dataset_path, df_name)) for object_group in
+        tqdm(object_groups, desc=f"Processing {df_name} dataset"))
 
-def generate_data_yaml(new_dataset_path : str, classes : dict):
+
+def generate_data_yaml(new_dataset_path: str, classes: dict):
     # train
     with open(os.path.join(new_dataset_path, "data.yaml"), "w") as f:
         f.write("train: ../train/images\n")
@@ -102,6 +104,90 @@ def generate_data_yaml(new_dataset_path : str, classes : dict):
             f.write(f"  {class_id}: {class_name}\n")
 
     print(" > data.yaml generated")
+
+# convert bounding box from yolo format to coco format
+def convert_yolo_to_coco_format(yolo_bbox, img_width, img_height):
+    """
+    Convert bounding box from yolo format to coco format.
+
+    Args:
+        yolo_bbox (list): Bounding box in yolo format (x_center_norm, y_center_norm, width_norm, height_norm).
+        img_width (int): Image width.
+        img_height (int): Image height.
+
+    Returns:
+        List containing bounding box in coco format (x_min, y_min, width, height).
+    """
+    x_center_norm, y_center_norm, width_norm, height_norm = yolo_bbox
+    x_min = (x_center_norm - width_norm / 2) * img_width
+    y_min = (y_center_norm - height_norm / 2) * img_height
+    width = width_norm * img_width
+    height = height_norm * img_height
+
+    return [x_min, y_min, width, height]
+
+def process_annotation_file(label_file, labels_path, images_path, idx_to_catname_map, folder):
+    """
+    Return
+    """
+    data = []
+    ann_id = 0
+    img_file = label_file.replace('.txt', '.jpg')  # Assuming image format is .jpg
+    img_path = os.path.join(images_path, img_file)
+
+    # Check if corresponding image file exists
+    if not os.path.exists(img_path):
+        return data
+
+    # Get image dimensions
+    with Image.open(img_path) as img:
+        img_width, img_height = img.size
+
+    # keep end of path (ex: "datasets/yolo taco xxx/train/images/000000000001.jpg" -> "train/images/000000000001.jpg")
+    img_path_end = "/".join(img_path.split(os.sep)[-3:])
+
+    # Read YOLO annotations
+    with open(os.path.join(labels_path, label_file), 'r') as file:
+        for line in file:
+            cat_id, cx, cy, width, height = [float(x) for x in line.split()]
+            cat_id = int(cat_id)
+            cat_name = idx_to_catname_map.get(cat_id, 'Unknown')
+
+            # Compute area
+            area = (width * img_width) * (height * img_height)
+
+            data.append([img_path_end, img_file, img_width, img_height, cat_id, cat_name, ann_id, cx, cy, width, height, area, folder])
+            ann_id += 1
+
+    return data
+
+def generate_meta_df(root_path: str, idx_to_catname_map: dict):
+    final_columns = ['path','img_file', 'img_width', 'img_height', 'cat_id', 'cat_name', 'ann_id', 'cx', 'cy', 'width', 'height', 'area', 'split']
+    print(f"> Generating meta_df for {root_path}")
+
+
+    all_data = []
+    for folder in ['train', 'val', 'test']:
+        if folder not in os.listdir(root_path):
+            continue
+
+        images_path = os.path.join(root_path, folder, 'images')
+        labels_path = os.path.join(root_path, folder, 'labels')
+
+        label_files = os.listdir(labels_path)
+        results = Parallel(n_jobs=6)(delayed(process_annotation_file)(label_file, labels_path, images_path, idx_to_catname_map, folder) for label_file in tqdm(label_files, desc=f"Processing {folder} dataset"))
+
+        for result in results:
+            all_data.extend(result)
+
+    meta_df = pd.DataFrame(all_data, columns=final_columns)
+    print(f"> Done. meta_df shape: {meta_df.shape}")
+    print(meta_df.head())
+    return meta_df
+
+
+
+
 
 
 
@@ -124,20 +210,20 @@ def main_data_processing_yolo_format():
 
     # process cat_id
     taco_meta_df["cat_id"] = taco_meta_df["cat_name"].apply(lambda x: CATNAME_TO_IDX_MAP[x])
-    # Example usage
+    # --- split dataset
     train_df, val_df = train_test_split(
         taco_meta_df,
         test_size=0.15,
         random_state=123,
-        stratify=taco_meta_df["supercategory"] # we can't stratify by cat_name because : the least populated class in y has only 1 member, which is too few. The minimum number of groups for any class cannot be less than 2.
+        stratify=taco_meta_df["supercategory"]
+        # todo : we can't stratify by cat_name because : the least populated class in y has only 1 member, which is too few. The minimum number of groups for any class cannot be less than 2.
     )
-    #train_df = train_df.head(50)
-    #val_df = val_df.head(50)
+    # train_df = train_df.head(50)
+    # val_df = val_df.head(50)
     print(f"train_df: {len(train_df)} ({len(train_df) / len(taco_meta_df) * 100:.1f}%)")
     print(f"val_df: {len(val_df)} ({len(val_df) / len(taco_meta_df) * 100:.1f}%)")
 
-    # Vos chemins de fichiers et autres configurations initiales restent inchangés
-    # Sequential processing of the datasets
+    # --- Processing of the datasets
     print(" > Launching processing of the datasets")
     NEW_TACO_DATASET_PATH = f"{os.path.dirname(TACO_DATASET_ROOT_PATH)}/taco-yolo-format train-{len(train_df)}-val-{len(val_df)} {YYYYMMDDHH}"
     print(f" > New dataset path: {NEW_TACO_DATASET_PATH}")
@@ -145,6 +231,30 @@ def main_data_processing_yolo_format():
     process_images_parallel(val_df, NEW_TACO_DATASET_PATH, "val")
     print(f" > Done. New dataset path: {NEW_TACO_DATASET_PATH}")
     generate_data_yaml(NEW_TACO_DATASET_PATH, classes=IDX_TO_CATNAME_MAP)
+
+    # --- Create meta_df.csv
+    meta_df = generate_meta_df(NEW_TACO_DATASET_PATH, idx_to_catname_map=IDX_TO_CATNAME_MAP)
+    print(f" > meta_df shape: {meta_df.shape}")
+    meta_df.to_csv(os.path.join(NEW_TACO_DATASET_PATH, f'meta_df.csv'), index=False)
+
+
+def main_meta_df_generation():
+    TACO_DATASET_ROOT_PATH = r"N:\My Drive\KESKIA Drive Mlamali\datasets\taco-yolo-format train-4066-val-718 20231218_14"
+    # define the path to your YAML file
+    yaml_file_path = os.path.join(TACO_DATASET_ROOT_PATH, "data.yaml")
+    if not os.path.exists(yaml_file_path):
+        raise Exception(f"YAML file not found at {yaml_file_path}")
+    # open the YAML file and load it into a dictionary
+    with open(yaml_file_path, 'r') as f:
+        data_yaml = yaml.safe_load(f)
+
+    meta_df = generate_meta_df(TACO_DATASET_ROOT_PATH, idx_to_catname_map=data_yaml["names"])
+
+    # Save to CSV
+    YYYYMMDDHH = datetime.now().strftime("%Y%m%d_%H")
+    meta_df.to_csv(os.path.join(TACO_DATASET_ROOT_PATH, f'meta_df.csv'), index=False)
+
+
 
 if __name__ == "__main__":
     main_data_processing_yolo_format()
