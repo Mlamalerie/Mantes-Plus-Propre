@@ -276,3 +276,71 @@ SUPERCATIDX_2_SUPERCATNAME = {0: 'Aluminium foil',
                               25: 'Styrofoam piece',
                               26: 'Unlabeled litter',
                               27: 'Cigarette'}
+
+SUPERCATNAME_2_SUPERCATIDX = {v: k for k, v in SUPERCATIDX_2_SUPERCATNAME.items()}
+
+EN_SUPERCATNAME_2_FR_SUPERCATNAME = {
+    'Aluminium foil': 'Papier d\'aluminium',
+    'Battery': 'Batterie',
+    'Blister pack': 'Plaquette thermoformée',
+    'Bottle': 'Bouteille',
+    'Bottle cap': 'Bouchon de bouteille',
+    'Broken glass': 'Verre brisé',
+    'Can': 'Canette',
+    'Carton': 'Carton',
+    'Cup': 'Tasse',
+    'Food waste': 'Déchets alimentaires',
+    'Glass jar': 'Pot en verre',
+    'Lid': 'Couvercle',
+    'Other plastic': 'Autre plastique',
+    'Paper': 'Papier',
+    'Paper bag': 'Sac en papier',
+    'Plastic bag & wrapper': 'Sac en plastique et emballage',
+    'Plastic container': 'Conteneur en plastique',
+    'Plastic glooves': 'Gants en plastique',
+    'Plastic utensils': 'Ustensiles en plastique',
+    'Pop tab': 'Onglet de canette',
+    'Rope & strings': 'Corde et ficelles',
+    'Scrap metal': 'Métal usagé',
+    'Shoe': 'Chaussure',
+    'Squeezable tube': 'Tube compressible',
+    'Straw': 'Paille',
+    'Styrofoam piece': 'Morceau de polystyrène',
+    'Unlabeled litter': 'Déchets non étiquetés',
+    'Cigarette': 'Cigarette'
+}
+
+FR_SUPERCATNAME_2_EN_SUPERCATNAME = {v: k for k, v in EN_SUPERCATNAME_2_FR_SUPERCATNAME.items()}
+
+SUPERCATNAME_2_EMOJI = {
+    'Aluminium foil': '🔩',
+    'Battery': '🔋',
+    'Blister pack': '💊',
+    'Bottle': '🍾',
+    'Bottle cap': '🔘',
+    'Broken glass': '🔨',
+    'Can': '🥫',
+    'Carton': '📦',
+    'Cup': '🥤',
+    'Food waste': '🍽️🗑️',
+    'Glass jar': '🍯',
+    'Lid': '🔘',
+    'Other plastic': '♻️',
+    'Paper': '📄',
+    'Paper bag': '🛍️',
+    'Plastic bag & wrapper': '♻️',
+    'Plastic container': '🥡',
+    'Plastic glooves': '🧤',
+    'Plastic utensils': '🍴',
+    'Pop tab': '🥤',
+    'Rope & strings': '🧵',
+    'Scrap metal': '🔩',
+    'Shoe': '👟',
+    'Squeezable tube': '🧴',
+    'Straw': '🥤',
+    'Styrofoam piece': '☕',
+    'Unlabeled litter': '❓🗑️',
+    'Cigarette': '🚬'
+}
+
+
