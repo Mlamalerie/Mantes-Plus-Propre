@@ -10,7 +10,6 @@ from config import *
 import yaml
 
 
-
 def split_dataset(df, val_size=0.1, test_size=0.2, random_state=123, stratify_by=None):
     """Split dataset into train, validation, and test sets.
 
@@ -93,10 +92,16 @@ def process_images_parallel(df, new_dataset_path, df_name, n_jobs=-1):
 
 
 def generate_data_yaml(new_dataset_path: str, classes: dict):
-    # train
+    # list dir
+    dir_names = [x for x in os.listdir(new_dataset_path) if os.path.isdir(os.path.join(new_dataset_path, x))]
     with open(os.path.join(new_dataset_path, "data.yaml"), "w") as f:
-        f.write("train: ../train/images\n")
-        f.write("val: ../val/images\n")
+
+        if len(dir_names) == 0:
+            raise Exception(f"No folder found in {new_dataset_path}")
+        for dir_name in dir_names:
+            if dir_name not in ["train", "val", "test"]:
+                continue
+            f.write(f"{dir_name}: {dir_name}/images\n")
 
         f.write("nc: {}\n".format(len(classes)))
         f.write("names:\n")
@@ -104,6 +109,7 @@ def generate_data_yaml(new_dataset_path: str, classes: dict):
             f.write(f"  {class_id}: {class_name}\n")
 
     print(" > data.yaml generated")
+
 
 # convert bounding box from yolo format to coco format
 def convert_yolo_to_coco_format(yolo_bbox, img_width, img_height):
@@ -126,6 +132,7 @@ def convert_yolo_to_coco_format(yolo_bbox, img_width, img_height):
 
     return [x_min, y_min, width, height]
 
+
 def process_annotation_file(label_file, labels_path, images_path, idx_to_catname_map, folder):
     """
     Return
@@ -143,7 +150,7 @@ def process_annotation_file(label_file, labels_path, images_path, idx_to_catname
     with Image.open(img_path) as img:
         img_width, img_height = img.size
 
-    # keep end of path (ex: "datasets/yolo taco xxx/train/images/000000000001.jpg" -> "train/images/000000000001.jpg")
+    # keep end of path (ex: "datasets/yolo taco-base-gif xxx/train/images/000000000001.jpg" -> "train/images/000000000001.jpg")
     img_path_end = "/".join(img_path.split(os.sep)[-3:])
 
     # Read YOLO annotations
@@ -156,15 +163,18 @@ def process_annotation_file(label_file, labels_path, images_path, idx_to_catname
             # Compute area
             area = (width * img_width) * (height * img_height)
 
-            data.append([img_path_end, img_file, img_width, img_height, cat_id, cat_name, ann_id, cx, cy, width, height, area, folder])
+            data.append(
+                [img_path_end, img_file, img_width, img_height, cat_id, cat_name, ann_id, cx, cy, width, height, area,
+                 folder])
             ann_id += 1
 
     return data
 
-def generate_meta_df(root_path: str, idx_to_catname_map: dict):
-    final_columns = ['path','img_file', 'img_width', 'img_height', 'cat_id', 'cat_name', 'ann_id', 'cx', 'cy', 'width', 'height', 'area', 'split']
-    print(f"> Generating meta_df for {root_path}")
 
+def generate_meta_df(root_path: str, catidx_2_catname: dict):
+    final_columns = ['path', 'img_file', 'img_width', 'img_height', 'cat_id', 'cat_name', 'ann_id', 'cx', 'cy', 'width',
+                     'height', 'area', 'split']
+    print(f"> Generating meta_df for {root_path}")
 
     all_data = []
     for folder in ['train', 'val', 'test']:
@@ -175,7 +185,9 @@ def generate_meta_df(root_path: str, idx_to_catname_map: dict):
         labels_path = os.path.join(root_path, folder, 'labels')
 
         label_files = os.listdir(labels_path)
-        results = Parallel(n_jobs=6)(delayed(process_annotation_file)(label_file, labels_path, images_path, idx_to_catname_map, folder) for label_file in tqdm(label_files, desc=f"Processing {folder} dataset"))
+        results = Parallel(n_jobs=6)(
+            delayed(process_annotation_file)(label_file, labels_path, images_path, catidx_2_catname, folder) for
+            label_file in tqdm(label_files, desc=f"Processing {folder} dataset"))
 
         for result in results:
             all_data.extend(result)
@@ -184,11 +196,6 @@ def generate_meta_df(root_path: str, idx_to_catname_map: dict):
     print(f"> Done. meta_df shape: {meta_df.shape}")
     print(meta_df.head())
     return meta_df
-
-
-
-
-
 
 
 def main_data_processing_yolo_format():
@@ -209,31 +216,28 @@ def main_data_processing_yolo_format():
     taco_meta_df['height_norm'] = taco_meta_df['height'] / taco_meta_df['img_height']
 
     # process cat_id
-    taco_meta_df["cat_id"] = taco_meta_df["cat_name"].apply(lambda x: CATNAME_TO_IDX_MAP[x])
+    taco_meta_df["cat_id"] = taco_meta_df["cat_name"].apply(lambda x: CATNAME_2_CATIDX[x])
     # --- split dataset
-    train_df, val_df = train_test_split(
-        taco_meta_df,
-        test_size=0.15,
-        random_state=123,
-        stratify=taco_meta_df["supercategory"]
-        # todo : we can't stratify by cat_name because : the least populated class in y has only 1 member, which is too few. The minimum number of groups for any class cannot be less than 2.
-    )
+    print(" > Splitting dataset")
+    train_df, val_df, test_df = split_dataset(taco_meta_df, val_size=0.1, test_size=0.1, random_state=123,
+                                              stratify_by="supercategory")
     # train_df = train_df.head(50)
     # val_df = val_df.head(50)
-    print(f"train_df: {len(train_df)} ({len(train_df) / len(taco_meta_df) * 100:.1f}%)")
-    print(f"val_df: {len(val_df)} ({len(val_df) / len(taco_meta_df) * 100:.1f}%)")
+    print(f"* train_df: {len(train_df)} ({len(train_df) / len(taco_meta_df) * 100:.1f}%)")
+    print(f"* val_df: {len(val_df)} ({len(val_df) / len(taco_meta_df) * 100:.1f}%)")
+    print(f"* test_df: {len(test_df)} ({len(test_df) / len(taco_meta_df) * 100:.1f}%)")
 
     # --- Processing of the datasets
     print(" > Launching processing of the datasets")
-    NEW_TACO_DATASET_PATH = f"{os.path.dirname(TACO_DATASET_ROOT_PATH)}/taco-yolo-format train-{len(train_df)}-val-{len(val_df)} {YYYYMMDDHH}"
+    NEW_TACO_DATASET_PATH = f"{os.path.dirname(TACO_DATASET_ROOT_PATH)}/taco-dataset (yoloformat) train-{len(train_df)}-val-{len(val_df)}-test-{len(test_df)} {YYYYMMDDHH}"
     print(f" > New dataset path: {NEW_TACO_DATASET_PATH}")
-    process_images_parallel(train_df, NEW_TACO_DATASET_PATH, "train")
-    process_images_parallel(val_df, NEW_TACO_DATASET_PATH, "val")
+    for df, df_name in [(train_df, "train"), (val_df, "val"), (test_df, "test")]:
+        process_images_parallel(df, NEW_TACO_DATASET_PATH, df_name, n_jobs=6)
     print(f" > Done. New dataset path: {NEW_TACO_DATASET_PATH}")
-    generate_data_yaml(NEW_TACO_DATASET_PATH, classes=IDX_TO_CATNAME_MAP)
+    generate_data_yaml(NEW_TACO_DATASET_PATH, classes=CATIDX_2_CATNAME)
 
     # --- Create meta_df.csv
-    meta_df = generate_meta_df(NEW_TACO_DATASET_PATH, idx_to_catname_map=IDX_TO_CATNAME_MAP)
+    meta_df = generate_meta_df(NEW_TACO_DATASET_PATH, catidx_2_catname=CATIDX_2_CATNAME)
     print(f" > meta_df shape: {meta_df.shape}")
     meta_df.to_csv(os.path.join(NEW_TACO_DATASET_PATH, f'meta_df.csv'), index=False)
 
@@ -248,12 +252,11 @@ def main_meta_df_generation():
     with open(yaml_file_path, 'r') as f:
         data_yaml = yaml.safe_load(f)
 
-    meta_df = generate_meta_df(TACO_DATASET_ROOT_PATH, idx_to_catname_map=data_yaml["names"])
+    meta_df = generate_meta_df(TACO_DATASET_ROOT_PATH, catidx_2_catname=data_yaml["names"])
 
     # Save to CSV
     YYYYMMDDHH = datetime.now().strftime("%Y%m%d_%H")
     meta_df.to_csv(os.path.join(TACO_DATASET_ROOT_PATH, f'meta_df.csv'), index=False)
-
 
 
 if __name__ == "__main__":

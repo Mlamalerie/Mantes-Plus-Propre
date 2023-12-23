@@ -3,7 +3,7 @@ streamlit
 matplotlib
 seaborn
 jupyter
-opencv-python
+opencv-python-headless
 graphviz
 tqdm
 scikit-learn
@@ -12,3 +12,7 @@ pillow
 joblib
 replicate
 python-dotenv
+ultralytics
+moviepy
+ffmpeg
+pydantic
