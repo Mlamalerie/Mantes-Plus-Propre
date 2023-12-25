@@ -1,7 +1,7 @@
 data/
 outputs/
 *.jit
-ai/ego_blur/
+ai/ego_blur/*
 
 ### VisualStudioCode template
 .vscode/*

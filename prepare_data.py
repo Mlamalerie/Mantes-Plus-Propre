@@ -10,7 +10,7 @@ from config import *
 import yaml
 
 
-def split_dataset(df, val_size=0.1, test_size=0.2, random_state=123, stratify_by=None):
+def split_dataset(df, val_size=0.1, test_size=0.2, random_state=123, stratify_by=None, no_test_set=False):
     """Split dataset into train, validation, and test sets.
 
     Args:
@@ -26,6 +26,16 @@ def split_dataset(df, val_size=0.1, test_size=0.2, random_state=123, stratify_by
     # Ensure stratify_by is a valid column
     if stratify_by not in df.columns:
         stratify_by = None
+
+    if no_test_set:
+        # Splitting the dataset into training and validation sets
+        train_df, val_df = train_test_split(
+            df,
+            test_size=val_size,
+            random_state=random_state,
+            stratify=df[stratify_by] if stratify_by else None
+        )
+        return train_df, val_df, None
 
     # Adjust val_size to reflect the proportion of the remaining dataset after test split
     val_size_adjusted = val_size / (1 - test_size)
@@ -198,7 +208,7 @@ def generate_meta_df(root_path: str, catidx_2_catname: dict):
     return meta_df
 
 
-def main_data_processing_yolo_format():
+def main_data_processing_yolo_format(cat_lang="fr", no_test_set=False, val_size=0.1, test_size=0.1, n_jobs=-1):
     TACO_DATASET_ROOT_PATH = r"N:\My Drive\KESKIA Drive Mlamali\datasets\taco-2gb"
     YYYYMMDDHH = datetime.now().strftime("%Y%m%d_%H")
 
@@ -216,28 +226,34 @@ def main_data_processing_yolo_format():
     taco_meta_df['height_norm'] = taco_meta_df['height'] / taco_meta_df['img_height']
 
     # process cat_id
-    taco_meta_df["cat_id"] = taco_meta_df["cat_name"].apply(lambda x: CATNAME_2_CATIDX[x])
+    taco_meta_df["cat_id"] = taco_meta_df["cat_name"].apply(lambda x: EN_CATNAME_2_CATIDX[x])
     # --- split dataset
     print(" > Splitting dataset")
-    train_df, val_df, test_df = split_dataset(taco_meta_df, val_size=0.1, test_size=0.1, random_state=123,
-                                              stratify_by="supercategory")
-    # train_df = train_df.head(50)
-    # val_df = val_df.head(50)
-    print(f"* train_df: {len(train_df)} ({len(train_df) / len(taco_meta_df) * 100:.1f}%)")
-    print(f"* val_df: {len(val_df)} ({len(val_df) / len(taco_meta_df) * 100:.1f}%)")
-    print(f"* test_df: {len(test_df)} ({len(test_df) / len(taco_meta_df) * 100:.1f}%)")
+    dfs_splitting = split_dataset(taco_meta_df, val_size=val_size, test_size=test_size, random_state=123,
+                                              stratify_by="supercategory", no_test_set=no_test_set)
+
+    train_df, val_df, test_df = dfs_splitting if not no_test_set else (dfs_splitting[0], dfs_splitting[1], None)
+
+    for df, df_name in [(train_df, "train"), (val_df, "val"), (test_df, "test")]:
+        if df is not None:
+            print(f" * {df_name} dataset: {len(df)} ({len(df) / len(taco_meta_df) * 100:.1f}%)")
 
     # --- Processing of the datasets
     print(" > Launching processing of the datasets")
-    NEW_TACO_DATASET_PATH = f"{os.path.dirname(TACO_DATASET_ROOT_PATH)}/taco-dataset (yoloformat) train-{len(train_df)}-val-{len(val_df)}-test-{len(test_df)} {YYYYMMDDHH}"
+    NEW_TACO_DATASET_PATH = f"{os.path.dirname(TACO_DATASET_ROOT_PATH)}/taco-dataset (yoloformat) train-{len(train_df)}-val-{len(val_df)}"
+    NEW_TACO_DATASET_PATH = f"{NEW_TACO_DATASET_PATH}-test-{len(test_df)}" if not no_test_set else NEW_TACO_DATASET_PATH
+    NEW_TACO_DATASET_PATH = f"{NEW_TACO_DATASET_PATH} {YYYYMMDDHH}"
+
     print(f" > New dataset path: {NEW_TACO_DATASET_PATH}")
     for df, df_name in [(train_df, "train"), (val_df, "val"), (test_df, "test")]:
-        process_images_parallel(df, NEW_TACO_DATASET_PATH, df_name, n_jobs=6)
+        if df is not None:
+            process_images_parallel(df, NEW_TACO_DATASET_PATH, df_name, n_jobs=n_jobs)
     print(f" > Done. New dataset path: {NEW_TACO_DATASET_PATH}")
-    generate_data_yaml(NEW_TACO_DATASET_PATH, classes=CATIDX_2_CATNAME)
+    generate_data_yaml(NEW_TACO_DATASET_PATH, classes=CATIDX_2_EN_CATNAME if cat_lang == "en" else CATIDX_2_FR_CATNAME)
 
     # --- Create meta_df.csv
-    meta_df = generate_meta_df(NEW_TACO_DATASET_PATH, catidx_2_catname=CATIDX_2_CATNAME)
+    meta_df = generate_meta_df(NEW_TACO_DATASET_PATH,
+                               catidx_2_catname=CATIDX_2_EN_CATNAME if cat_lang == "en" else CATIDX_2_FR_CATNAME)
     print(f" > meta_df shape: {meta_df.shape}")
     meta_df.to_csv(os.path.join(NEW_TACO_DATASET_PATH, f'meta_df.csv'), index=False)
 
@@ -260,4 +276,4 @@ def main_meta_df_generation():
 
 
 if __name__ == "__main__":
-    main_data_processing_yolo_format()
+    main_data_processing_yolo_format(cat_lang="fr", no_test_set=0, val_size=0.1, test_size=0.1, n_jobs=4)
