@@ -4,7 +4,7 @@ from ultralytics import YOLO
 
 
 #model_path = 'yolov8s.pt'
-model_path = "ai/yolo_models/best yolov8s [taco-yolo-format train-4066-val-718 20231218_18, epochs=100] 20231223_0024.pt"
+model_path = "src/weights/best yolov8s [taco-dataset (yoloformat) train-3826-val-479-test-479 20231225_22, epochs=100] 20231225_2345.pt"
 model = YOLO(model_path)
 
 
@@ -29,8 +29,8 @@ while cap.isOpened():
         st_frame.image(annotated_frame, channels='BGR')
 
         # Break the loop if 'q' is pressed
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        #if cv2.waitKey(1) & 0xFF == ord("q"):
+        #    break
     else:
         # Break the loop if the end of the video is reached
         break
