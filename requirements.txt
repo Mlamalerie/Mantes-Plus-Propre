@@ -4,9 +4,7 @@ matplotlib
 seaborn
 jupyter
 opencv-python-headless
-graphviz
 tqdm
-scikit-learn
 imageio
 pillow
 joblib
@@ -16,3 +14,5 @@ ultralytics
 moviepy
 ffmpeg
 pydantic
+fastapi
+uvicorn

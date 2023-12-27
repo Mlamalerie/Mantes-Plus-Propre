@@ -2,6 +2,8 @@
 
 > Agissons ensemble pour une mantes plus jolie !
 
+![](assets/img/val_batch2_pred.jpg)
+
 
 ## Installation
 
@@ -11,7 +13,7 @@ Ensuite, créez un fichier `.env` à la racine du projet et ajoutez-y les variab
 
 ```
 REPLICATE_API_TOKEN=your_replicate_api_token # for the generation of cartoon
-
+BASEROW_DB_API_TOKEN=your_baserow_db_api_token # access to the baserow database
 ```
 
 ## Lancement

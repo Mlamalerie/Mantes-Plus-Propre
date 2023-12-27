@@ -320,6 +320,9 @@ EN_CATNAME_2_EMOJI = {
     'Unlabeled litter': '❓🗑️',  # A question mark and a trash can for unknown litter.
     'Cigarette': '🚬'
 }
+
+CATIDX_2_EMOJI = {cat_idx : EN_CATNAME_2_EMOJI[en_cat] for cat_idx, en_cat in CATIDX_2_EN_CATNAME.items()}
+
 EN_SUPERCATNAME_2_EMOJI = {
     'Aluminium foil': '🔩',
     'Battery': '🔋',

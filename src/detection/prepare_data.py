@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import yaml
 
-def adjust_stratify_column(df, stratify_by : str, min_instances_per_class:int=6):
+
+def adjust_stratify_column(df, stratify_by: str, min_instances_per_class: int = 6):
     """Adjust the stratify column to ensure each class has at least 6 instances.
 
     Args:
@@ -29,7 +30,8 @@ def adjust_stratify_column(df, stratify_by : str, min_instances_per_class:int=6)
     small_classes = class_counts[class_counts < min_instances_per_class].index
     # afficher si il y a des classes avec moins de 6 instances
     if len(small_classes) > 0:
-        print(f" > {len(small_classes)} classes with less than {min_instances_per_class} instances > {list(small_classes)}")
+        print(
+            f" > {len(small_classes)} classes with less than {min_instances_per_class} instances > {list(small_classes)}")
 
     # Fusionner les petites classes dans une nouvelle catégorie
     new_stratify_col.loc[new_stratify_col.isin(small_classes)] = 'Other'
@@ -38,6 +40,7 @@ def adjust_stratify_column(df, stratify_by : str, min_instances_per_class:int=6)
     df['adjusted_stratify'] = new_stratify_col
 
     return df
+
 
 def split_dataset(df, val_size=0.1, test_size=0.2, random_state=123, stratify_by=None, no_test_set=False):
     """Split dataset into train, validation, and test sets.
@@ -266,7 +269,7 @@ def main_data_processing_yolo_format(cat_lang="fr", no_test_set=False, val_size=
     # --- split dataset
     print(" > Splitting dataset")
     dfs_splitting = split_dataset(taco_meta_df, val_size=val_size, test_size=test_size, random_state=123,
-                                              stratify_by="cat_name", no_test_set=no_test_set)
+                                  stratify_by="cat_name", no_test_set=no_test_set)
 
     train_df, val_df, test_df = dfs_splitting if not no_test_set else (dfs_splitting[0], dfs_splitting[1], None)
 
@@ -279,7 +282,6 @@ def main_data_processing_yolo_format(cat_lang="fr", no_test_set=False, val_size=
     print("-" * 10)
     taco_meta_df = pd.concat([train_df, val_df, test_df], ignore_index=True)
 
-
     # --- Processing of the datasets
     print(" > Launching processing of the datasets")
     NEW_TACO_DATASET_PATH = f"{os.path.dirname(TACO_DATASET_ROOT_PATH)}/taco-dataset (yoloformat) train-{len(train_df)}-val-{len(val_df)}"
@@ -287,6 +289,7 @@ def main_data_processing_yolo_format(cat_lang="fr", no_test_set=False, val_size=
     NEW_TACO_DATASET_PATH = f"{NEW_TACO_DATASET_PATH} {YYYYMMDDHH}"
 
     ### plot class distribution (train, val, test, bar on same plot) # grouped bar plot
+    # todo make a fonction for this from meta_df save
     fig, ax = plt.subplots(figsize=(20, 10))
     ax = sns.countplot(x="cat_name", hue="split", data=taco_meta_df)
     ax.set_ticks(rotation=90)
