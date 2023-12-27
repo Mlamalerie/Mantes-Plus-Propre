@@ -1,5 +1,8 @@
 data/
-outputs/
+results/
+weights/
+*.jit
+
 
 ### VisualStudioCode template
 .vscode/*
