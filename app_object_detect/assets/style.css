@@ -1,0 +1,4 @@
+.sidebar .logo img {
+    max-width: 700px; /* Ajustez la largeur comme vous le souhaitez */
+    height: auto; /* Garde le ratio hauteur/largeur */
+}
