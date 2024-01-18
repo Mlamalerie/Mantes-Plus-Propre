@@ -16,3 +16,5 @@ ffmpeg
 pydantic
 fastapi
 uvicorn
+folium
+streamlit-folium

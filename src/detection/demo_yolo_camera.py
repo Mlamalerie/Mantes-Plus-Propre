@@ -1,12 +1,20 @@
 from ultralytics import YOLO
 
-#model_path = 'yolov8s.pt'
-model_path = "../weights/best yolov8s [taco-yolo-format train-4066-val-718 20231218_18, epochs=100] 20231223_0024.pt"
+model_path = "../weights/yolov8n.pt"
+#model_path = "../weights/best yolov8s [taco-yolo-format train-4066-val-718 20231218_18, epochs=100] 20231223_0024.pt"
+
 model = YOLO(model_path)
 
-results = model.predict(source="0", show=True)
+bool_camera = False
+input_image_path = "../../notebooks/reports/egoblur_demo/mantes (18).jpg"
+# get full path
+import os
+input_image_path = os.path.abspath(input_image_path)
 
-print(results)
+results = model(input_image_path if not bool_camera else "0", project="inference", name="detect")
+
+for i, box_det in enumerate(results[0].boxes):
+    print(f"Detection {i}: {box_det}")
 
 """
 import cv2

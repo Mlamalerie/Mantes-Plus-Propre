@@ -1,17 +1,18 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from api.schemas.detection_schemas import DetectionRequest, DetectionResponse
-
+from typing import Optional
 router = APIRouter()
 
 # ~ endpoint de détection d'objets
-@router.post("/", response_model=DetectionResponse)
-async def detect(request: DetectionRequest):
+@router.post("/image", response_model=DetectionResponse)
+async def detect(request: DetectionRequest, confidence : float = 0.5, limit : Optional[int] = 50):
     """
     Lance la détection d'objets sur une image encodée en base64 et renvoie les résultats
     """
     print(request.image)
+
     #try:
-    #    detections = run_detection(request.image)  # Assurez-vous que cette fonction traite l'image encodée en base64 et renvoie le format attendu
+    #    detections = run_detection(request.image)     # Assurez-vous que cette fonction traite l'image encodée en base64 et renvoie le format attendu
     #    return DetectionResponse(detections=detections)
     #except Exception as e:
     #    raise HTTPException(status_code=500, detail=str(e))
@@ -46,19 +47,6 @@ async def model_metadata():
 
     return {}
 
-# ~ endpoint de mise à jour du modèle #todo est ce que c'est utile ?
-@router.post("/model/update")
-async def update_model():
-    """
-    Mettre à jour le modèle YOLO en chargeant une nouvelle version.
-    """
-    #try:
-    #    update_model()  # Assurez-vous que cette fonction met à jour le modèle
-    #    return {"status": "ok"}
-    #except Exception as e:
-    #    raise HTTPException(status_code=500, detail=str(e))
-
-    return {"status": "ok"}
 
 # ~ endpoint pour les statistiques d'utilisation du modèle
 @router.get("/usage/stats")

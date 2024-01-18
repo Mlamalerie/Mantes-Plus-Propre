@@ -2,6 +2,8 @@ data/
 results/
 weights/
 *.jit
+runs/
+.inference/
 
 
 ### VisualStudioCode template
