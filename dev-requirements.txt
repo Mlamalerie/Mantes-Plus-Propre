@@ -19,3 +19,10 @@ pydantic
 dataframe_image
 fastapi
 uvicorn
+numpy
+requests
+ipython
+torch
+torchvision
+pyyaml
+folium

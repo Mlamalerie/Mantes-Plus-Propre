@@ -257,7 +257,7 @@ def main_data_processing_yolo_format(cat_lang="fr", no_test_set=False, val_size=
 
     taco_meta_df["path"] = taco_meta_df["img_file"].apply(lambda x: os.path.join(TACO_DATASET_ROOT_PATH, "data", x))
 
-    # add new img file path (replace '/' by '_')
+    # add new assets file path (replace '/' by '_')
     taco_meta_df["img_file"] = taco_meta_df["img_file"].apply(lambda x: x.replace("/", "_"))
 
     # Calcul et ajout des nouvelles colonnes normalisées (cx cy rw rh)

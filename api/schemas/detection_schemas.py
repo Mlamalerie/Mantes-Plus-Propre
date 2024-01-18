@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from fastapi import File, UploadFile
 
 # class boxes (label, y, y, w, h)
 
 class DetectionRequest(BaseModel):
-    image_url : str = Field(..., description="Image url to detect objects from.")
+    file : UploadFile = File(..., description="Image à analyser.")
     confidence: float = Field(0.5, ge=0, le=1, description="Confidence threshold for the predictions.")
     limit: Optional[int] = Field(..., ge=1, description="Maximum number of predictions to return.")
 

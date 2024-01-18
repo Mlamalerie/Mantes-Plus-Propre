@@ -2,7 +2,7 @@
 
 > Agissons ensemble pour une mantes plus jolie !
 
-![](img/val_batch2_pred.jpg)
+![](assets/val_batch2_pred.jpg)
 
 
 ## Installation
