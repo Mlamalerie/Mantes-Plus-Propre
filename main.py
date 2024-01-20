@@ -45,4 +45,5 @@ def read_root():
 
 # Point d'entrée pour l'exécution avec Uvicorn
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # port 8080
+    uvicorn.run(app, port=8080, host="0.0.0.0")

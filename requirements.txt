@@ -18,3 +18,4 @@ fastapi
 uvicorn
 folium
 streamlit-folium
+python-multipart

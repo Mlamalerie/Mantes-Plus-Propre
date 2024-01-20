@@ -81,6 +81,7 @@ CATIDX_2_EN_CATNAME = {0: 'Aluminium foil',
                        80: 'Graffiti',
                        81: 'Diffuse waste',
                        }
+BULKY_WASTE_IDXS : list = [62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
 
 EN_CATNAME_2_CATIDX = {v: k for k, v in CATIDX_2_EN_CATNAME.items()}
 
