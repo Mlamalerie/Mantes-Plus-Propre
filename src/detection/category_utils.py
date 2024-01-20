@@ -1,4 +1,3 @@
-#
 CATIDX_2_EN_CATNAME = {0: 'Aluminium foil',
                        1: 'Battery',
                        2: 'Aluminium blister pack',
@@ -58,7 +57,31 @@ CATIDX_2_EN_CATNAME = {0: 'Aluminium foil',
                        56: 'Paper straw',
                        57: 'Styrofoam piece',
                        58: 'Unlabeled litter',
-                       59: 'Cigarette'}
+                       59: 'Cigarette',
+                       60: 'Bin',
+                       61: 'Underground container',
+                       62: 'Mattress',
+                       63: 'Bed complaint',
+                       64: 'Sofa and armchair',
+                       65: 'Furniture',
+                       66: 'Table',
+                       67: 'Chair',
+                       68: 'Others furniture items',
+                       69: 'Refrigerator',
+                       70: 'Washing machine',
+                       71: 'Oven',
+                       72: 'Wood planks and other wood',
+                       73: 'Wood pallet',
+                       74: 'Screens',
+                       75: 'Others electronic Equipment',
+                       76: 'Metal waste',
+                       77: 'Plastic buckets',
+                       78: 'Gravats',
+                       79: 'Christmas tree',
+                       80: 'Graffiti',
+                       81: 'Diffuse waste',
+                       }
+BULKY_WASTE_IDXS : list = [62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
 
 EN_CATNAME_2_CATIDX = {v: k for k, v in CATIDX_2_EN_CATNAME.items()}
 
@@ -95,7 +118,7 @@ EN_CATNAME_2_FR_CATNAME = {
     'Other plastic': 'Autre plastique',
     'Magazine paper': 'Papier de magazine',
     'Tissues': 'Mouchoirs',
-    'Wrapping paper': 'Papier cadeau',
+    'Wrapping paper': 'Papier d\'emballage',
     'Normal paper': 'Papier ordinaire',
     'Paper bag': 'Sac en papier',
     'Plastified paper bag': 'Sac en papier plastifié',
@@ -122,11 +145,34 @@ EN_CATNAME_2_FR_CATNAME = {
     'Paper straw': 'Paille en papier',
     'Styrofoam piece': 'Morceau de polystyrène',
     'Unlabeled litter': 'Déchets non étiquetés',
-    'Cigarette': 'Cigarette'
+    'Cigarette': 'Cigarette',
+    'Bin': 'Poubelle',
+    'Underground container': 'Conteneur enterré',
+    'Mattress': 'Matelas',
+    'Bed complaint': 'Sommier',
+    'Sofa and armchair': 'Canapé et fauteuil',
+    'Furniture': 'Meuble de rangement',
+    'Table': 'Table',
+    'Chair': 'Chaise',
+    'Others furniture items': 'Autres meubles ou éléments de mobilier',
+    'Refrigerator': 'Réfrigérateur',
+    'Washing machine': 'Machine à laver',
+    'Oven': 'Four',
+    'Wood planks and other wood': 'Planches de bois et autres bois',
+    'Wood pallet': 'Palette en bois',
+    'Screens': 'Écrans',
+    'Others electronic Equipment': 'Autres équipements électroniques',
+    'Metal waste': 'Déchets métalliques',
+    'Plastic buckets': 'Seaux en plastique',
+    'Gravats': 'Gravats',
+    'Christmas tree': 'Sapin de Noël',
+    'Graffiti': 'Graffiti',
+    'Diffuse waste': 'Déchets diffus',
+
 }
 FR_CATNAME_2_EN_CATNAME = {v: k for k, v in EN_CATNAME_2_FR_CATNAME.items()}
 
-CATIDX_2_FR_CATNAME = {cat_idx : EN_CATNAME_2_FR_CATNAME[en_cat] for cat_idx, en_cat in CATIDX_2_EN_CATNAME.items()}
+CATIDX_2_FR_CATNAME = {cat_idx: EN_CATNAME_2_FR_CATNAME[en_cat] for cat_idx, en_cat in CATIDX_2_EN_CATNAME.items()}
 FR_CATNAME_2_CATIDX = {v: k for k, v in CATIDX_2_FR_CATNAME.items()}
 
 CATIDX_2_EN_SUPERCATNAME = {0: 'Aluminium foil',
@@ -181,14 +227,40 @@ CATIDX_2_EN_SUPERCATNAME = {0: 'Aluminium foil',
                             49: 'Plastic utensils',
                             50: 'Pop tab',
                             51: 'Rope & strings',
-                            52: 'Scrap metal',
+                            52: 'Metal',
                             53: 'Shoe',
                             54: 'Squeezable tube',
                             55: 'Straw',
                             56: 'Straw',
                             57: 'Styrofoam piece',
                             58: 'Unlabeled litter',
-                            59: 'Cigarette'}
+                            59: 'Cigarette',
+                            60: 'Trash Container',
+                            61: 'Trash Container',
+                            62: 'Large Household Item',
+                            63: 'Large Household Item',
+                            64: 'Large Household Item',
+                            65: 'Large Household Item',
+                            66: 'Large Household Item',
+                            67: 'Large Household Item',
+                            68: 'Large Household Item',
+                            69: 'Home Appliance',
+                            70: 'Home Appliance',
+                            71: 'Home Appliance',
+                            72: 'Wood',
+                            73: 'Wood',
+                            74: 'Electronic',
+                            75: 'Electronic',
+                            76: 'Metal',
+                            77: 'Plastic container',
+                            78: 'Gravats',
+                            79: "Seasonal waste",
+                            80: "Graffiti",
+                            81: "Diffuse waste"
+                            }
+
+EN_CATNAME_2_EN_SUPERCATNAME = {catname: CATIDX_2_EN_SUPERCATNAME[catidx] for catidx, catname in
+                                CATIDX_2_EN_CATNAME.items()}
 
 SUPERCATIDX_2_EN_SUPERCATNAME = {0: 'Aluminium foil',
                                  1: 'Battery',
@@ -211,16 +283,26 @@ SUPERCATIDX_2_EN_SUPERCATNAME = {0: 'Aluminium foil',
                                  18: 'Plastic utensils',
                                  19: 'Pop tab',
                                  20: 'Rope & strings',
-                                 21: 'Scrap metal',
+                                 21: 'Metal',
                                  22: 'Shoe',
                                  23: 'Squeezable tube',
                                  24: 'Straw',
                                  25: 'Styrofoam piece',
                                  26: 'Unlabeled litter',
-                                 27: 'Cigarette'}
+                                 27: 'Cigarette',
+                                 28: 'Trash Container',
+                                 29: 'Large Household Item',
+                                 30: 'Home Appliance',
+                                 31: 'Wood',
+                                 32: 'Electronic',
+                                 33: 'Gravats',
+                                 34: "Seasonal waste",
+                                 35: "Graffiti",
+                                 36: "Diffuse waste"
+
+                                 }
 
 EN_SUPERCATNAME_2_SUPERCATIDX = {v: k for k, v in SUPERCATIDX_2_EN_SUPERCATNAME.items()}
-
 
 EN_SUPERCATNAME_2_FR_SUPERCATNAME = {
     'Aluminium foil': 'Papier d\'aluminium',
@@ -245,18 +327,28 @@ EN_SUPERCATNAME_2_FR_SUPERCATNAME = {
     'Pop tab': 'Onglet de canette',
     'Rope & strings': 'Corde et ficelles',
     'Scrap metal': 'Métal usagé',
+    'Metal': 'Métal',
     'Shoe': 'Chaussure',
     'Squeezable tube': 'Tube compressible',
     'Straw': 'Paille',
     'Styrofoam piece': 'Morceau de polystyrène',
     'Unlabeled litter': 'Déchets non étiquetés',
-    'Cigarette': 'Cigarette'
+    'Cigarette': 'Cigarette',
+    'Trash Container': 'Conteneur à déchets',
+    'Large Household Item': 'Gros objet ménager',
+    'Home Appliance': 'Appareil électroménager',
+    'Wood': 'Bois',
+    'Electronic': 'Appareil électronique',
+    'Gravats': 'Gravats',
+    'Seasonal waste': 'Déchets saisonniers',
+    'Graffiti': 'Graffiti',
+    'Diffuse waste': 'Déchets diffus'
 }
 
 FR_SUPERCATNAME_2_EN_SUPERCATNAME = {v: k for k, v in EN_SUPERCATNAME_2_FR_SUPERCATNAME.items()}
 
-CATIDX_2_FR_SUPERCATNAME = {cat_idx : EN_SUPERCATNAME_2_FR_SUPERCATNAME[en_cat] for cat_idx, en_cat in CATIDX_2_EN_SUPERCATNAME.items()}
-
+CATIDX_2_FR_SUPERCATNAME = {cat_idx: EN_SUPERCATNAME_2_FR_SUPERCATNAME[en_cat] for cat_idx, en_cat in
+                            CATIDX_2_EN_SUPERCATNAME.items()}
 
 EN_CATNAME_2_EMOJI = {
     'Aluminium foil': '🔩',  # Since there's no specific emoji for aluminum foil, I used a metal-related emoji.
@@ -297,7 +389,7 @@ EN_CATNAME_2_EMOJI = {
     'Plastified paper bag': '🛍️',
     'Plastic film': '♻️',
     'Six pack rings': '🍺',  # Beer emoji to represent six-pack rings.
-    'Garbage bag': '🗑️',
+    'Garbage bag': '💰🗑️',
     'Other plastic wrapper': '♻️',
     'Single-use carrier bag': '🛍️',
     'Polypropylene bag': '♻️',
@@ -318,10 +410,34 @@ EN_CATNAME_2_EMOJI = {
     'Paper straw': '🥤',
     'Styrofoam piece': '☕',
     'Unlabeled litter': '❓🗑️',  # A question mark and a trash can for unknown litter.
-    'Cigarette': '🚬'
+    'Cigarette': '🚬',
+    'Bin': '🚮🗑️',
+    'Underground container': '🗑️',
+    'Mattress': '🛏️',
+    'Bed complaint': '🛏️',
+    'Sofa and armchair': '🛋️',
+    'Furniture': '🛋️',
+    'Table': '🪑',
+    'Chair': '🪑',
+    'Others furniture items': '🛋️',
+    'Refrigerator': '🧊🗄️',
+    'Washing machine': '🧺',
+    'Oven': '🍕',
+    'Wood planks and other wood': '🪵',
+    'Wood pallet': '🪵',
+    'Screens': '🖥️',
+    'Others electronic Equipment': '🔌',
+    'Metal': '🔩🔧',
+    'Plastic buckets': '🪣',
+    'Gravats': '🪨',
+    'Christmas tree': '🎄',
+    'Graffiti': '🎨',
+    'Diffuse waste': '🗑️🍌🗺️'
+
+
 }
 
-CATIDX_2_EMOJI = {cat_idx : EN_CATNAME_2_EMOJI[en_cat] for cat_idx, en_cat in CATIDX_2_EN_CATNAME.items()}
+CATIDX_2_EMOJI = {cat_idx: EN_CATNAME_2_EMOJI.get(en_cat, None) for cat_idx, en_cat in CATIDX_2_EN_CATNAME.items()}
 
 EN_SUPERCATNAME_2_EMOJI = {
     'Aluminium foil': '🔩',
@@ -354,6 +470,7 @@ EN_SUPERCATNAME_2_EMOJI = {
     'Cigarette': '🚬'
 }
 
+
 # generate csv table [cat_idx, en_cat, fr_cat, en_super_cat, fr_super_cat, emoji]
 def generate_table():
     import csv
@@ -373,6 +490,7 @@ def generate_table():
             })
 
     print('generate __categories.csv done')
+
 
 if __name__ == '__main__':
     generate_table()

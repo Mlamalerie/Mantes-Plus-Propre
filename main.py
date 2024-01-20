@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from api.endpoints import detection
 import uvicorn
 
@@ -18,6 +20,20 @@ app = FastAPI(
     },
 )
 
+# the backend must have a list of « allowed origins »
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["POST", "GET"],
+    allow_headers=["*"],
+)
+
 
 # Ajout des routes à l'application
 app.include_router(detection.router, tags=["Détection"], prefix="/detect")
@@ -29,4 +45,5 @@ def read_root():
 
 # Point d'entrée pour l'exécution avec Uvicorn
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # port 8080
+    uvicorn.run(app, port=8080, host="0.0.0.0")

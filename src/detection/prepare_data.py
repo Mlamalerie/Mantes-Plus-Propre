@@ -6,7 +6,7 @@ from tqdm import tqdm
 from datetime import datetime
 from PIL import Image
 from joblib import Parallel, delayed
-from category_utils import *
+from src.detection.category_utils import *
 import matplotlib.pyplot as plt
 import seaborn as sns
 import yaml
@@ -202,7 +202,12 @@ def process_annotation_file(label_file, labels_path, images_path, idx_to_catname
     # Read YOLO annotations
     with open(os.path.join(labels_path, label_file), 'r', encoding="utf-8") as file:
         for line in file:
-            cat_id, cx, cy, width, height = [float(x) for x in line.split()]
+            try:
+                cat_id, cx, cy, width, height = [float(x) for x in line.split()]
+            except Exception as e:
+                print(f" > Error with line: {line}")
+                continue
+
             cat_id = int(cat_id)
             cat_name = idx_to_catname_map.get(cat_id, 'Unknown')
 
@@ -217,7 +222,7 @@ def process_annotation_file(label_file, labels_path, images_path, idx_to_catname
     return data
 
 
-def generate_meta_df(root_path: str, catidx_2_catname: dict):
+def generate_meta_df(root_path: str, catidx_2_catname: dict, n_jobs=-1):
     final_columns = ['path', 'img_file', 'img_width', 'img_height', 'cat_id', 'cat_name', 'ann_id', 'cx', 'cy', 'width',
                      'height', 'area', 'split']
     print(f"> Generating meta_df for {root_path}")
@@ -231,7 +236,7 @@ def generate_meta_df(root_path: str, catidx_2_catname: dict):
         labels_path = os.path.join(root_path, folder, 'labels')
 
         label_files = os.listdir(labels_path)
-        results = Parallel(n_jobs=6)(
+        results = Parallel(n_jobs=n_jobs)(
             delayed(process_annotation_file)(label_file, labels_path, images_path, catidx_2_catname, folder) for
             label_file in tqdm(label_files, desc=f"Processing {folder} dataset"))
 
@@ -240,7 +245,7 @@ def generate_meta_df(root_path: str, catidx_2_catname: dict):
 
     meta_df = pd.DataFrame(all_data, columns=final_columns)
     print(f"> Done. meta_df shape: {meta_df.shape}")
-    print(meta_df.head())
+    #print(meta_df.head())
     return meta_df
 
 
@@ -252,10 +257,10 @@ def main_data_processing_yolo_format(cat_lang="fr", no_test_set=False, val_size=
 
     taco_meta_df["path"] = taco_meta_df["img_file"].apply(lambda x: os.path.join(TACO_DATASET_ROOT_PATH, "data", x))
 
-    # add new img file path (replace '/' by '_')
+    # add new assets file path (replace '/' by '_')
     taco_meta_df["img_file"] = taco_meta_df["img_file"].apply(lambda x: x.replace("/", "_"))
 
-    # Calcul et ajout des nouvelles colonnes normalisées
+    # Calcul et ajout des nouvelles colonnes normalisées (cx cy rw rh)
     taco_meta_df['x_center_norm'] = (taco_meta_df['x'] + taco_meta_df['width'] / 2) / taco_meta_df['img_width']
     taco_meta_df['y_center_norm'] = (taco_meta_df['y'] + taco_meta_df['height'] / 2) / taco_meta_df['img_height']
     taco_meta_df['width_norm'] = taco_meta_df['width'] / taco_meta_df['img_width']
@@ -302,6 +307,8 @@ def main_data_processing_yolo_format(cat_lang="fr", no_test_set=False, val_size=
         if df is not None:
             process_images_parallel(df, NEW_TACO_DATASET_PATH, df_name, n_jobs=n_jobs)
     print(f" > Done. New dataset path: {NEW_TACO_DATASET_PATH}")
+
+    #todo : dans le dictionnaire CATIDX_2_EN_CATNAME, prendre juste le 60 premier qd c juste le processing du tacodataset
     generate_data_yaml(NEW_TACO_DATASET_PATH, classes=CATIDX_2_EN_CATNAME if cat_lang == "en" else CATIDX_2_FR_CATNAME)
 
     # --- Create meta_df.csv

@@ -2,7 +2,7 @@
 
 > Agissons ensemble pour une mantes plus jolie !
 
-![](assets/img/val_batch2_pred.jpg)
+![](assets/val_batch2_pred.jpg)
 
 
 ## Installation
@@ -32,3 +32,4 @@ Pour lancer l'application, utilisez la commande `python streamlit run app.py`.
 
 ├── pages # Contient les pages de l'application
 │   ├── __init__.py
+
