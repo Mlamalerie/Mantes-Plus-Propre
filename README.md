@@ -22,14 +22,34 @@ Pour lancer l'application, utilisez la commande `python streamlit run app.py`.
 
 ## Structure du projet
 
-``` 
-.
-├── README.md
-├── app.py 
-├── requirements.txt
-├── .env
-├── assets # Contient les assets de l'application et autres fichiers statiques (css, js, images, etc.)
+## Déploiement
 
-├── pages # Contient les pages de l'application
-│   ├── __init__.py
+### Construction des images Docker
+
+```shell
+# Construire l'image Docker pour le backend
+docker build -t image-mpp-api -f Dockerfile-api .
+# Construire l'image Docker pour le frontend
+docker build -t image-mpp-app -f Dockerfile-app .
+```
+
+### Démarrage des conteneurs
+
+Démarrer les deux services dans des conteneurs Docker distincts.
+
+```shell
+# --- Démarrer le serveur FastAPI
+echo "Démarrage du serveur FastAPI..."
+docker run --name mpp-api -p 8000:8000 -v shared_volume:/app/.inference image-mpp-api
+#docker run --name mpp-api -p 8000:8000 -v "N:\My Drive\KESKIA Drive Mlamali\Mantes-Plus-Propre\.inference":/app/.inference image-api-mpp
+
+# --- Démarrer le serveur Streamlit
+echo "Démarrage du serveur Streamlit..."
+docker run --name mpp-app -p 8501:8501 -v shared_volume:/app/.inference image-mpp-app
+#docker run --name mpp-app -p 8501:8501 -v "N:\My Drive\KESKIA Drive Mlamali\Mantes-Plus-Propre\.inference":/app/.inference image-app-mpp
+
+
+echo "Les serveurs sont démarrés."
+```
+
 

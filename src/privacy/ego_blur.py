@@ -401,6 +401,7 @@ def blur_detections_in_image(
     )
 
     if save_output_image:
+        print(f"Saving output image to {output_image_path}")
         write_image(image, output_image_path)
 
     return image
@@ -486,7 +487,7 @@ def load_face_detector(model_path : str):
 
 
 if __name__ == "__main__":
-    print("Starting EgoBlur demo...")
+    print("Starting EgoBlur...")
     start_time = time.time()
     args = validate_inputs(parse_args())
     if args.face_model_path is not None:

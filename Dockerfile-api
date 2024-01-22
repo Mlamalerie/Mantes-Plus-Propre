@@ -1,0 +1,27 @@
+# Utiliser une image Python officielle correspondant à votre version Python
+FROM python:3.10.0-slim-buster
+
+# Définir le répertoire de travail dans le conteneur
+WORKDIR /app
+
+# Copier les fichiers de dépendances et installer les packages
+# Assurez-vous que api-requirements.txt est à la racine du contexte de build
+COPY requirements-api.txt .
+RUN pip install --no-cache-dir -r requirements-api.txt
+
+# Copier les dossiers nécessaires dans le conteneur
+COPY src /app/src
+COPY src/detection /app/src/detection
+COPY ["src/weights/best yolov8s [fused-dataset 20240115, epochs=100] 20240118_0113.pt", "/app/src/weights/best yolov8s [fused-dataset 20240115, epochs=100] 20240118_0113.pt"]
+COPY api /app/api
+# Assurez-vous de copier tout autre fichier/dossier nécessaire
+
+# Copier le fichier principal de l'API si nécessaire
+# Par exemple, si main.py est à la racine du dossier 'api'
+COPY api/main.py /app/main.py
+
+# Exposer le port sur lequel l'API s'exécutera
+EXPOSE 8000
+
+# Commande pour lancer l'API
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

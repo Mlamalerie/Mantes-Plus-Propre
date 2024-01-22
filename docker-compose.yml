@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mpp-api:
+    build:
+      context: .
+      dockerfile: Dockerfile-api
+    image: image-mpp-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - shared_volume:/app/.inference
+      # Si vous voulez utiliser un chemin local spécifique sur votre hôte, commentez la ligne ci-dessus et décommentez la ligne suivante
+      # - "N:/My Drive/KESKIA Drive Mlamali/Mantes-Plus-Propre/.inference:/app/.inference"
+    container_name: mpp-api
+
+  mpp-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+    image: image-mpp-app
+    ports:
+      - "8501:8501"
+    volumes:
+      - shared_volume:/app/.inference
+      # Si vous voulez utiliser un chemin local spécifique sur votre hôte, commentez la ligne ci-dessus et décommentez la ligne suivante
+      # - "N:/My Drive/KESKIA Drive Mlamali/Mantes-Plus-Propre/.inference:/app/.inference"
+    container_name: mpp-app
+
+volumes:
+  shared_volume:

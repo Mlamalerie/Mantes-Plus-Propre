@@ -6,7 +6,7 @@ model_path = "../weights/yolov8n.pt"
 model = YOLO(model_path)
 
 bool_camera = False
-input_image_path = "../../assets/egoblur_demo/mantes (18).jpg"
+input_image_path = "../../images_demo/egoblur_demo/mantes (18).jpg"
 # get full path
 import os
 input_image_path = os.path.abspath(input_image_path)
