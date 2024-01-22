@@ -1,0 +1,24 @@
+# Utiliser une image de base Python
+FROM python:3.10.0-slim-buster
+
+# Définir le répertoire de travail dans le conteneur
+WORKDIR /app
+
+# Copier les fichiers de dépendances et installer les packages
+COPY requirements-app.txt  .
+RUN pip install --no-cache-dir -r requirements-app.txt
+
+# Copier les fichiers nécessaires de votre application Streamlit
+COPY Accueil.py /app/Accueil.py
+COPY assets /app/assets
+COPY pages /app/pages
+COPY src/db /app/src/db
+COPY src/detection /app/src/detection
+COPY src/optimization /app/src/optimization
+
+
+# Exposer le port sur lequel Streamlit s'exécutera
+EXPOSE 8501
+
+# Commande pour lancer l'application Streamlit
+CMD ["streamlit", "run", "Accueil.py", "--server.port=8501", "--server.address=0.0.0.0"]

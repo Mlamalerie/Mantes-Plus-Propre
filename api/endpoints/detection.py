@@ -1,26 +1,28 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException, Response
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from PIL import Image
-import io
 from api.schemas.detection_schemas import DetectionResponse, ObjectDetection
 from src.detection.utils import __version__ as model_version
-from src.detection.utils import run_detection_from_array, read_imagefile, yolo_boxes_to_list
-import numpy as np
+from src.detection.utils import run_detection_from_array, read_imagefile
 import os
 from datetime import datetime
-import tempfile
-from PIL import Image, ImageOps, ImageDraw, ImageFont
+
+
+def yolo_boxes_to_list(boxes) -> List[ObjectDetection]:
+    result = []
+    if boxes is None:
+        return result
+    for i_det, box in enumerate(boxes):
+        xywh = box.xywh.cpu().numpy().flatten()  # Aplatir le tableau
+        xywh = xywh[0], xywh[1], xywh[2], xywh[3]
+
+        cls = int(box.cls.cpu().numpy().item())
+        conf = box.conf.cpu().numpy().item()
+
+        result.append(ObjectDetection(cls=cls, xywh=xywh, conf=conf))
+    return result
 
 router = APIRouter()
-
-
-class DetectionRequest(BaseModel):
-    file: UploadFile = File(..., description="Image à analyser.")
-    confidence: float = Field(0.5, ge=0, le=1, description="Confidence threshold for the predictions.")
-    limit: Optional[int] = Field(None, ge=1, description="Maximum number of predictions to return.")
-    date: datetime = Field(default_factory=datetime.now, description="Date de la détection.")
-
 
 @router.post("/image", response_model=DetectionResponse)
 async def detect(file: UploadFile = File(..., description="Image à analyser."),
@@ -60,3 +62,6 @@ async def health():
     Vérifier si l'API est en ligne et fonctionnelle.
     """
     return {"status": "ok", "model_version": model_version}
+
+
+

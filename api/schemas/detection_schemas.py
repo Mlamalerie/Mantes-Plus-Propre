@@ -3,18 +3,10 @@ from typing import List, Optional
 from fastapi import File, UploadFile
 from datetime import datetime
 
-# class boxes (label, y, y, w, h)
-
-
-
 class ObjectDetection(BaseModel):
     cls: int = Field(..., description="Class of the object detected.")
-    x1: float = Field(..., description="x1 coordinate of the bounding box.")
-    y1: float = Field(..., description="y1 coordinate of the bounding box.")
-    x2: float = Field(..., description="x2 coordinate of the bounding box.")
-    y2: float = Field(..., description="y2 coordinate of the bounding box.")
+    xywh : List[float] = Field(..., description="Bounding box coordinates (x1, y1, w, h).")
     conf: float = Field(..., description="Confidence of the prediction.", ge=0, le=1)
-
 
 class DetectionResponse(BaseModel):
     count: int
