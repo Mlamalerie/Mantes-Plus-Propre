@@ -150,6 +150,7 @@ with map_container:
             progress_text = "Génération de la carte... Attention, cela peut prendre du temps."
             my_bar = st.progress(0, text=progress_text)
             for i, row_item in df_data.iterrows():
+                google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={lat},{long}"
                 id_ = row_item['id']
                 lat = row_item['latitude']
                 long = row_item['longitude']
@@ -178,6 +179,7 @@ with map_container:
                                         <b>Date de capture:</b> {date}<br>
                                         <b>Status:</b> {status}<br>
                                         <b>Description:</b> {description}
+                                        <b>Itinéraire:</b><a href="{google_maps_url}" target="_blank">Itinéraire Google Maps</a>
                                     </div>
                                 """
 
