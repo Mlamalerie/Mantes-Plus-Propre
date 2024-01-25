@@ -33,12 +33,14 @@ def mapp():
             description = item.get('description', 'Pas de description')
 
             if lat and long and photo_url and date and status and description:
+                google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={lat},{long}"
                 popup_html = f"""
                     <div>
                         <img src="{photo_url}" width="150" height="100" style="display:block;margin:auto;"><br>
                         <b>Date de capture:</b> {date}<br>
                         <b>Status:</b> {status}<br>
                         <b>Description:</b> {description}
+                        <b>Itinéraire:</b><a href="{google_maps_url}" target="_blank">Itinéraire Google Maps</a>
                     </div>
                 """
                 iframe = folium.IFrame(popup_html, width=200, height=250)

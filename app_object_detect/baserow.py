@@ -11,11 +11,10 @@ def get_baserow_data(api_url, api_key):
     if response.status_code == 200:
         data = response.json()
 
-        # Supposons que les données sont stockées dans une clé 'results'
         if 'results' in data:
             df = pd.DataFrame(data['results'])
         else:
-            df = pd.DataFrame(data)  # Si les données ne sont pas dans 'results'
+            df = pd.DataFrame(data)  
 
         print("Données récupérées :", df)
         return df

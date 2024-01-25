@@ -1,20 +1,43 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import time 
+import plotly.express as px 
+import numpy as np 
+import requests
+
+# Paramètres de l'API Baserow
+api_url = 'https://api.baserow.io/api/database/rows/table/234485/?user_field_names=true'
+api_key = 'TdUiddzmMMlNF1yCdHCGu15DBIZFknp7'
+
+# Fonction pour récupérer les données de Baserow
+def get_baserow_data(api_url, api_key):
+    headers = {"Authorization": f"Token {api_key}"}
+    response = requests.get(api_url, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception("Erreur lors de la récupération des données de Baserow")
 
 def home():
-    st.header('Page d\'accueil')
+    st.title('Detection des Dechets - Dashboard')
     st.write('Bienvenue sur l\'application de détection des déchets sauvages de Mantes-La-Jolie.')
         
     # Visualisation des données
-    st.write('Statistiques et informations récentes...')
+    st.write('Real-Time / Live Data Dashboard')
 
     meta_data = pd.read_csv('meta_df.csv')
+    
+    #filtres
+    categories = st.selectbox("Selectionne la categorie de dechet", pd.unique(meta_data["cat_name"]))
 
+    st.markdown("### Metrics KPI")
     col1, col2 = st.columns(2)
-    col1.metric(label="Nombre de Catégories", value=meta_data['cat_name'].nunique())
+    col1.metric(label="Nombre de Catégories", value=meta_data['cat_name'].nunique(), delta= +10)
     col2.metric(label="Nombre de Supercatégories", value=meta_data['supercategory'].nunique())
+    
     # Histogramme de la Répartition des Catégories
+    st.markdown("### Histogrammes")
     fig1, ax = plt.subplots()
     meta_data['cat_name'].value_counts().plot(kind='bar', ax=ax)
     ax.set_title('Répartition des Catégories')
@@ -48,8 +71,18 @@ def home():
     # Affichage des graphiques dans des colonnes
     col1, col2 = st.columns(2)
     with col1:
-        st.pyplot(fig1)
+        st.write(fig1)
         st.pyplot(fig3)
     with col2:
         st.pyplot(fig2)
         st.pyplot(fig4)
+
+    st.markdown("### Detailed Data from Meta_csv View")
+    st.dataframe(meta_data)
+    
+
+    data = get_baserow_data(api_url, api_key)['results']
+    df = pd.DataFrame(data)
+    st.markdown("### Detailed Data from Baserow View")
+    st.dataframe(df)
+    time.sleep(1)
