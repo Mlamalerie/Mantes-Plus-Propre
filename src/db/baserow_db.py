@@ -1,20 +1,18 @@
 import requests
 import json
-import pandas as pd
 import replicate
-from IPython.display import Image
 import os
 # load env
 from dotenv import load_dotenv
-from tqdm import tqdm
 from typing import List, Dict, Optional
-from src.detection.category_utils import CATIDX_2_EN_CATNAME
+from src.category_utils import CATIDX_2_EN_CATNAME
 from pydantic import BaseModel, Field
-from datetime import datetime
-import io
+import numpy as np
+
+TABLE_ID_REAL = 244285
+TABLE_ID_DEMO = 246046
 
 load_dotenv()
-
 
 class DetectedDechet(BaseModel):
     photo: List[dict] = Field(..., description="List of photos.")
@@ -24,7 +22,6 @@ class DetectedDechet(BaseModel):
     latitude: str = Field(..., description="Latitude.")
     status: int = Field(1266082, description="Status.")
     description: Optional[str] = Field(None, description="Description.")
-
 
 
 class BaserowTable:
@@ -43,10 +40,10 @@ class BaserowTable:
         else:
             kwargs["headers"]["Authorization"] = f"Token {os.environ['BASEROW_DB_API_TOKEN']}"
         r = requests.request(method, url, **kwargs)
-        if r.status_code == 200:
+        if r.status_code == 200 or method == "DELETE":
             print("Success!") if verbose else None
         else:
-            raise Exception("Error!", f"{r.status_code} {r.text}")
+            raise Exception("Error!", f"{r.status_code} {r.text} {r.reason}")
 
         return r.json()
 
@@ -92,6 +89,7 @@ class BaserowTable:
             r = self.__make_req(r["next"])
             results += r["results"]
 
+
         return results
 
     def get_row(self, row_id: int):
@@ -121,6 +119,29 @@ class BaserowTable:
         file_name = os.path.basename(file_path)
         ext = os.path.splitext(file_name)[1]
         return self.upload_file(file=(file_name, open(file_path, "rb"), f"image/{ext}"))
+
+    def update_row(self, row_id: int, data: dict):
+        url = f"https://api.baserow.io/api/database/rows/table/{self.table_id}/{row_id}/?user_field_names=true"
+        return self.__make_req(url, method="PATCH", json=data, headers={"Content-Type": "application/json"})
+    def delete_row(self, row_id: int):
+        url = f"https://api.baserow.io/api/database/rows/table/{self.table_id}/{row_id}/"
+        self.__make_req(url, method="DELETE")
+
+    def delete_all_rows(self, confirmation: bool = False):
+        rows = self.get_list_all_rows()
+        n_rows = len(rows)
+        print(f"Found {n_rows} rows.")
+        if confirmation:
+            for row in rows:
+                try:
+                    self.delete_row(row["id"])
+                except:
+                    #print(f"Error while deleting row {row['id']}")
+                    continue
+
+            print(f"Deleted.")
+        else:
+            print(f"Use `confirmation=True` to delete them.")
 
 
 class DechetsTable(BaserowTable):
@@ -170,7 +191,7 @@ class DechetsTable(BaserowTable):
         return " ".join(output_desc)
 
     def add_dechet_row(self, image: str | bytes, cat_idx_occurences: Dict[int,int], longitude: str, latitude: str,
-                       description: str = None,
+                       description: str = None, status: int = 1266082,
                        generate_description: bool = False, use_occurences_for_description: bool = False,
                        verbose: bool = False):
         if verbose:
@@ -185,6 +206,10 @@ class DechetsTable(BaserowTable):
         else:
             raise Exception("Image must be a path to the image or a file object.")
 
+        if status not in self.status_options_id_dict.keys():
+            raise Exception(f"Status {status} not in {self.status_options_id_dict.keys()}")
+
+
         # 2. Generate description
         if description is None and generate_description:
             if verbose:
@@ -198,13 +223,17 @@ class DechetsTable(BaserowTable):
             longitude=longitude,
             latitude=latitude,
             description=description,
+            status=status,
         )
         if verbose:
             print(f"> Ok. Creating row in Baserow DB...")
-        return super().create_row(data=detected_dechet.model_dump())
 
+        r = self.create_row(data=detected_dechet.model_dump())
+        if verbose:
+            print(f"> Ok. Done. {r['id']}")
+        return r
 
-if __name__ == "__main__":
+def main():
     DECHETS_TABLE_ID = 244285
 
     cat_table = BaserowTable(table_id=235215)
@@ -222,8 +251,29 @@ if __name__ == "__main__":
     # uploaded_result2 = table_manager.upload_file(file=("mantes (test).jpg", open(file_path, "rb").read(), "image/jpeg"))
     exit(0)
     # add row
-    response = table_manager.add_dechet_row(image=file_path, cat_idx_occurences={58: 10, 4: 2, 22: 10}, longitude="1.234",
-                                 latitude="2.345", generate_description=True, verbose=True)
+    response = table_manager.add_dechet_row(image=file_path, cat_idx_occurences={58: 10, 4: 2, 22: 10},
+                                            longitude="1.234",
+                                            latitude="2.345", generate_description=True, verbose=True)
 
     response
     print("end.")
+
+def main_generate_fake_table():
+    DECHETS_TABLE_ID = 246046
+
+    # Après avoir choisie une liste de point (exemple [(41.2564, 1.5), ...] )
+    base_points = [(48.99983156103193, 1.6841176691599162), (49.00372755154292, 1.7033343932870884), (48.987855683751064, 1.7193594554471827)]
+    # on va générer plusieurs faux point aléatoire autour de ce point
+    distance_max = 0.00001
+    points = [base_points]
+    n_max = 100
+    i = 0
+    while len(points) < n_max:
+        base_point = base_points[i%len(base_points)]
+        for i in range(10):
+            points.append([(base_point[0] + np.random.normal(scale=0.02), base_point[1] + np.random.normal(scale=0.02))])
+        i += 1
+
+
+if __name__ == "__main__":
+    main()

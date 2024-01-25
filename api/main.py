@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.endpoints import detection, blur
+from api.endpoints import detection, blurring
 import uvicorn
 
 app = FastAPI(
     title="Mantes + Propre API 🌍",
     description="API pour la détection des déchets dans la ville de Mantes-la-Jolie, utilisant YOLOv8s. 🚀",
-    version="1.0.0",
+    version="2024.01.1",
     terms_of_service="http://example.com/terms/",
     contact={
         "name": "Développeur Mantes Plus Propre",
@@ -23,7 +23,9 @@ app = FastAPI(
 # the backend must have a list of « allowed origins »
 origins = [
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:8080"
+
+
 ]
 
 app.add_middleware(
@@ -37,7 +39,7 @@ app.add_middleware(
 
 # Ajout des routes à l'application
 app.include_router(detection.router, tags=["Détection"], prefix="/detect")
-app.include_router(blur.router, tags=["Annonymisation"], prefix="/blur")
+app.include_router(blurring.router, tags=["Annonymisation"], prefix="/blur")
 
 # Endpoint principal pour vérifier que l'API fonctionne
 @app.get("/", tags=["Accueil"])

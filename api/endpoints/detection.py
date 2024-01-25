@@ -2,9 +2,9 @@ from fastapi import APIRouter, File, UploadFile, HTTPException, Response
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from api.schemas.detection_schemas import DetectionResponse, ObjectDetection
-from src.detection.utils import __version__ as model_version
-from src.detection.utils import run_detection_from_array, read_imagefile
+from src.detection.utils import __version__ as model_version, read_imagefile, run_detection_from_array
 import os
+import base64
 from datetime import datetime
 
 
@@ -26,8 +26,7 @@ router = APIRouter()
 
 @router.post("/image", response_model=DetectionResponse)
 async def detect(file: UploadFile = File(..., description="Image à analyser."),
-                 confidence: float = 0.5,
-                 limit: Optional[int] = None):
+                 confidence: float = 0.5):
     """
     Lance la détection d'objets sur une image encodée en base64 et renvoie les résultats
     """
@@ -48,8 +47,13 @@ async def detect(file: UploadFile = File(..., description="Image à analyser."),
         raise HTTPException(status_code=404, detail="No detections found.")
 
     output_image_path = os.path.join(save_dir, "image0.jpg")
+    # convert to base64
+    with open(output_image_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
 
+    #
     return DetectionResponse(count=len(output_detections.boxes),
+                             image=encoded_string,
                              detections=yolo_boxes_to_list(output_detections.boxes),
                              out_image_path=output_image_path
                              )

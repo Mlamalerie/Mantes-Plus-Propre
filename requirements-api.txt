@@ -4,7 +4,7 @@ pillow
 python-dotenv
 ultralytics
 moviepy
-#ffmpeg
+ffmpeg
 pydantic
 fastapi
 uvicorn

@@ -52,4 +52,47 @@ docker run --name mpp-app -p 8501:8501 -v shared_volume:/app/.inference image-mp
 echo "Les serveurs sont démarrés."
 ```
 
+Utiliser `docker-compose` pour démarrer les deux services dans des conteneurs Docker distincts.
+
+```shell
+# --- Démarrer les deux services dans des conteneurs Docker distincts
+docker-compose up -d
+```
+
+### Push des images sur Docker Hub
+
+```shell
+# --- Push de l'image API
+docker tag image-mpp-api mlamali/image-mpp-api:latest
+docker push mlamali/image-mpp-api:latest
+
+# --- Push de l'image APP
+docker tag image-mpp-app mlamali/image-mpp-app:latest
+docker push mlamali/image-mpp-app:latest
+```
+
+### Déploiement sur Heroku
+
+```shell
+# --- Connexion à Heroku
+heroku login
+
+# --- Création de l'application
+heroku create mpp-app
+
+# --- Push de l'image API
+heroku container:push web -a mpp-app
+
+# --- Déploiement de l'image API
+heroku container:release web -a mpp-app
+
+# --- Push de l'image APP
+heroku container:push web -a mpp-app
+
+# --- Déploiement de l'image APP
+heroku container:release web -a mpp-app
+```
+
+
+
 

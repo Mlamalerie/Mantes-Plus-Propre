@@ -14,11 +14,13 @@ COPY assets /app/assets
 COPY pages /app/pages
 COPY src/db /app/src/db
 COPY src/detection /app/src/detection
-COPY src/optimization /app/src/optimization
+COPY src/category_utils.py /app/src/category_utils.py
+COPY src/__init__.py /app/src/__init__.py
+#COPY src/optimization /app/src/optimization
 
 
 # Exposer le port sur lequel Streamlit s'exécutera
 EXPOSE 8501
 
 # Commande pour lancer l'application Streamlit
-CMD ["streamlit", "run", "Accueil.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "Accueil.py"]

@@ -6,7 +6,7 @@ from tqdm import tqdm
 from datetime import datetime
 from PIL import Image
 from joblib import Parallel, delayed
-from src.detection.category_utils import *
+from src.category_utils import *
 import matplotlib.pyplot as plt
 import seaborn as sns
 import yaml
