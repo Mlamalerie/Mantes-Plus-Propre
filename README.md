@@ -93,6 +93,8 @@ heroku container:push web -a mpp-app
 heroku container:release web -a mpp-app
 ```
 
+Si docker prend trop de place sur votre machine, vous pouvez utiliser la commande `docker system prune` pour supprimer les images inutilisées.
+https://stackoverflow.com/questions/39878939/docker-filling-up-storage-on-macos
 
 
 

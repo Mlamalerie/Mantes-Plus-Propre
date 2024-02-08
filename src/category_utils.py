@@ -427,7 +427,7 @@ EN_CATNAME_2_EMOJI = {
     'Wood pallet': '🪵',
     'Screens': '🖥️',
     'Others electronic Equipment': '🔌',
-    'Metal': '🔩🔧',
+    'Metal waste': '🔩🔧',
     'Plastic buckets': '🪣',
     'Gravats': '🪨',
     'Christmas tree': '🎄',
@@ -474,19 +474,19 @@ EN_SUPERCATNAME_2_EMOJI = {
 # generate csv table [cat_idx, en_cat, fr_cat, en_super_cat, fr_super_cat, emoji]
 def generate_table():
     import csv
-    with open('../../__categories.csv', 'w', newline='', encoding='utf-8') as csvfile:
+    with open('../__categories.csv', 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = ['cat_idx', 'en_cat', 'fr_cat', 'en_super_cat', 'fr_super_cat', 'emoji']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
-        for cat_idx in range(60):
+        for cat_idx, en_cat in CATIDX_2_EN_CATNAME.items():
             writer.writerow({
                 'cat_idx': cat_idx,
-                'en_cat': CATIDX_2_EN_CATNAME[cat_idx],
+                'en_cat': en_cat,
                 'fr_cat': CATIDX_2_FR_CATNAME[cat_idx],
                 'en_super_cat': CATIDX_2_EN_SUPERCATNAME[cat_idx],
                 'fr_super_cat': CATIDX_2_FR_SUPERCATNAME[cat_idx],
-                'emoji': EN_CATNAME_2_EMOJI[CATIDX_2_EN_CATNAME[cat_idx]]
+                'emoji': EN_CATNAME_2_EMOJI.get(en_cat, " ")
             })
 
     print('generate __categories.csv done')

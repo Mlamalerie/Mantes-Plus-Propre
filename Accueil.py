@@ -15,7 +15,8 @@ import base64
 # PAGE CONFIG and SIDEBAR #########################
 ###################################################
 
-page_logo = Image.open("./assets/logo.ico")
+logo_path = "./assets/logo.png"
+page_logo = Image.open(logo_path)
 st.set_page_config(
     page_title="Mantes + Propre",
     page_icon=page_logo,
@@ -24,7 +25,7 @@ st.set_page_config(
 
 st.sidebar.success(
     """
-    This is a **beta** version of the app.
+    Ceci est une version **beta** de l'application.
     """
 )
 # ===============
@@ -35,9 +36,11 @@ st.sidebar.success(
 if "user_img_file" not in st.session_state:
     st.session_state["user_img_file"] = None
 
+
 def clear_session_state():
     for key in st.session_state.keys():
         del st.session_state[key]
+
 
 # ===============
 # CONSTANTES
@@ -48,8 +51,8 @@ YYYYMMDD = datetime.now().strftime("%Y-%m-%d")
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 # base d'adresse pour l'api
-#API_BASE_URL = "http://localhost:8080"
-#API_BASE_URL = "http://mpp-api:8080"
+# API_BASE_URL = "http://localhost:8080"
+# API_BASE_URL = "http://mpp-api:8080"
 API_BASE_URL = "https://mpp-mantes-api-ddlzhsitgq-ew.a.run.app"
 
 
@@ -76,39 +79,40 @@ def init_get_location():
 # MAIN ############################################
 ###################################################
 
-debug_expander = st.expander("Debug")
+debug_expander = st.expander("   ")
 try:
     r_test_api = requests.get(API_BASE_URL)
 except Exception as e:
     st.error(f"Erreur lors de la vérification de l'API: {e}")
 
-
-
 with debug_expander:
     st.write(f"API: {API_BASE_URL}")
 
     st.write(st.session_state)
+
+_, col_logo, _ = st.columns([0.45, 0.1, 0.45])
+col_logo.image(page_logo, use_column_width=True)
 st.write("<h1 align='center'> <b> Mantes + Propre </b> </h1>", unsafe_allow_html=True)
 
-# Description
-st.write(
-    "<p align='center'> <b> Mantes + Propre </b> est une application qui permet de détecter les déchets sauvages sur des images et de les localiser sur une carte. </p>",
-    unsafe_allow_html=True)
-
+# Description enrichie
+st.markdown("""
+<p style='text-align: center;'>Bienvenue sur <b>Mantes + Propre</b>, l'application dédiée pour la propreté de la ville de Mantes-la-Jolie. 🌳🚮</p>
+<p style='text-align: center;'>Notre mission est simple mais ambitieuse : détecter tous les déchets sauvages dans la ville et les signaler pour qu'ils soient ramassés,
+contribuant ainsi à une ville plus propre et plus verte. 🌐💚</p>
+""", unsafe_allow_html=True)
 
 st.divider()
+print(st.session_state)
+st.markdown("""
+<h3 style='text-align: center; color: green;'>🔍 Oh... J'ai trouvé un déchet ! 📸</h3>
+<p align='center'> Vous vous promenez dans la ville et vous trouvez un déchet ? Prenez une photo et téléchargez-la ici. Nous nous occuperons de la détecter et de l'ajouter à la carte des déchets sauvages. </p>""",
+            unsafe_allow_html=True)
 
-st.markdown("<h4 align='center'> <b> Oh... J'ai trouvé un déchet ! </b> </h2>", unsafe_allow_html=True)
-st.write('\n')
-st.write(
-    "<p align='center'> Vous vous promenez dans la ville et vous trouvez un déchet ? Prenez une photo et téléchargez-la ici. Nous nous occuperons de la détecter et de l'ajouter à la carte des déchets sauvages. </p>",
-    unsafe_allow_html=True)
-st.write('\n')
 
 main_container = st.container(border=True)
 # Téléchargement de l'image
 cols_upload = main_container.columns([0.2, 0.8])
-camera_file = cols_upload[0].camera_input("Take a picture")
+camera_file = cols_upload[0].camera_input("Prendre une photo")
 uploaded_file = cols_upload[1].file_uploader("Choisissez une image...", type=["jpg", "jpeg", "png"])
 user_img_file = None
 # si pas de photo prise ou téléchargée, et pas de photo déjà téléchargée (session state)
@@ -130,7 +134,11 @@ orig_image = Image.open(user_img_file)
 # st.write(type(uploaded_file.getvalue()))
 col1.image(orig_image, caption='Image téléchargée', use_column_width=True)
 st.session_state["user_img_file"] = user_img_file
+# active
+active_description = col1.checkbox("Ajouter un message (optionnel)", value=True)
 
+if active_description:
+    description = col1.text_input("Que voyez-vous sur cette photo ?")
 launch_detection = col1.button('📷 Faire un signalement !', use_container_width=True, type="primary")
 
 # todo verify si l'image est dans la BDD (load manager avec cache)
@@ -175,7 +183,8 @@ if launch_detection:
     debug_expander.dataframe(df_detections_supercat_counts)
 
     df_detections_cls_counts = df_detections.groupby("cls").agg(
-        {"xywh": "count", "conf": "mean", "is_bulky": "first", "cat_name": "first", "supercat_name": "first"}).reset_index()
+        {"xywh": "count", "conf": "mean", "is_bulky": "first", "cat_name": "first",
+         "supercat_name": "first"}).reset_index()
     df_detections_cls_counts = df_detections_cls_counts.rename(columns={"xywh": "count", "conf": "mean_conf"})
     # df_detections_cls_counts = df_detections_cls_counts.sort_values("count", ascending=False)
     debug_expander.dataframe(df_detections_cls_counts)
@@ -188,7 +197,8 @@ if launch_detection:
     #    * `count` 'cat_name' emoji
     list_detection_text = ""
     plurial_str = "(s)" if n_detected > 1 else ""
-    with st.expander(f"Au moins **{n_detected} déchet{plurial_str}** trouvé{plurial_str}, dont {n_bulky} encombrant{plurial_str}."):
+    with st.expander(
+            f"Au moins **{n_detected} déchet{plurial_str}** trouvé{plurial_str}, dont {n_bulky} encombrant{plurial_str}."):
         for i, row_super in df_detections_supercat_counts.iterrows():
             list_detection_text += f"* `{row_super['count']}` {row_super['supercat_name']} \n"
             for j, row in df_detections_cls_counts[df_detections_cls_counts["supercat_name"] == row_super[
@@ -209,6 +219,8 @@ if launch_detection:
     st.sidebar.info(f"{latitude}, {longitude} [DEBUG]", icon="📍")
     # 2.2. Ajouter les données à la carte
 
+
+
     with st.spinner("🛢️ Enregistrement de votre photo dans notre base de données..."):
         dechets_db_manager = DB_manager(table_id=TABLE_ID_REAL)
         response = dechets_db_manager.add_dechet_row(image=decoded_output_image,
@@ -227,9 +239,9 @@ if launch_detection:
         st.success(f"Votre photo a bien été ajoutée à la base de données !", icon="😊")
         st.info("Vous pouvez dès à présent consulter la carte des déchets sauvages pour voir votre photo.", icon="🗺️")
 
+
         # clear session state and all
-        #clear_session_state()
+        # clear_session_state()
 
         # wait 2 seconds and reload page
-        #with st.spinner("Rechargement de la page..."):
-      
+        # with st.spinner("Rechargement de la page..."):
