@@ -88,7 +88,8 @@ filtres_expander = st.expander("Filtres")
 with st.spinner("Traitement des données..."):
     df_data = pd.json_normalize(data)
     # process data
-    # df_data['capture_date'] = pd.to_datetime(df_data['capture_date'])
+    df_data['capture_date'] = pd.to_datetime(df_data['capture_date'])
+    df_data['capture_date'] = df_data['capture_date'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
     # COLOR
     df_data['status.color'] = df_data['status.value'].apply(lambda x: "green" if x == "✅ Déchet Ramassé" else "blue" if x == "📅 Ramassage Planifié" else "black")
@@ -167,11 +168,14 @@ with map_container:
             progress_text = "Génération de la carte... Attention, cela peut prendre du temps."
             my_bar = st.progress(0, text=progress_text)
             for i,(idx_row, row_item) in enumerate(df_data.iterrows()):
+
                 id_ = row_item['id']
                 lat = row_item['latitude']
                 long = row_item['longitude']
+                google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={lat},{long}"
                 photo_url = row_item['photo'][0]['url'] if len(row_item['photo']) > 0 else None
                 date = row_item['capture_date']
+
                 status = row_item['status.value']
                 status_color = row_item['status.color']
                 description = row_item['description']
@@ -200,14 +204,16 @@ with map_container:
                 popup_html = f"""<div>
                                         <h4>{h4_text}</h4>  
                                         <img src="{photo_url}" width="150" height="100" style="display:block;margin:auto;"><br>
-                                        <b>Date de capture:</b> {date}<br>
                                         <b>Status:</b> {status}<br>
+                                        <b>Date de capture:</b> {date}<br>
                                         <b>Types de déchets:</b> {cat_idx_occurences_text}<br>
-                                        <b>Description:</b> {description} 
+                                        {'<b>Description:</b><br>' if description else ''} {description or ''} 
+
+                                        <b><a href="{google_maps_url}" target="_blank">Itinéraire Google Maps</a></b>
                                     </div>
                                 """
 
-                iframe = folium.IFrame(popup_html, width=200, height=250)
+                iframe = folium.IFrame(popup_html, width=225, height=250)
                 popup = folium.Popup(iframe, max_width=300)
 
                 if 60 in cat_idx_occurences.keys() or 61 in cat_idx_occurences.keys():
