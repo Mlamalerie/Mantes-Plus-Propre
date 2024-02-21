@@ -7,25 +7,61 @@ services:
       dockerfile: Dockerfile-api
     image: image-mpp-api
     ports:
-      - "8000:8000"
-    volumes:
-      - shared_volume:/app/.inference
-      # Si vous voulez utiliser un chemin local spécifique sur votre hôte, commentez la ligne ci-dessus et décommentez la ligne suivante
-      # - "N:/My Drive/KESKIA Drive Mlamali/Mantes-Plus-Propre/.inference:/app/.inference"
+      - "8080:8080"
+    develop:
+      watch:
+        - path: requirements-api.txt
+          action: rebuild
+        - path: api/**/*
+          target: /app/api/**/*
+          action: sync
+        - path: src/detection/**/*
+          target: /app/src/detection/**/*
+          action: sync
+        - path: src/category_utils.py
+          target: /app/src/category_utils.py
+          action: sync
+          #volumes:
+          #  - shared_volume:/app/.inference
+          # Si vous voulez utiliser un chemin local spécifique sur votre hôte, commentez la ligne ci-dessus et décommentez la ligne suivante
+          # - "N:/My Drive/KESKIA Drive Mlamali/Mantes-Plus-Propre/.inference:/app/.inference"
     container_name: mpp-api
+    networks:
+      mpp-network:
 
   mpp-app:
+    env_file: .env
     build:
       context: .
       dockerfile: Dockerfile-app
     image: image-mpp-app
     ports:
       - "8501:8501"
-    volumes:
-      - shared_volume:/app/.inference
+    develop:
+      watch:
+        - path: requirements-app.txt
+          action: rebuild
+        - path: pages/
+          target: /app/pages/
+          action: sync
+        - path: Accueil.py
+          target: /app/Accueil.py
+          action: sync
+        - path: src/category_utils.py
+          target: /app/src/category_utils.py
+          action: sync
+      #volumes:
+      #  - shared_volume:/app/.inference
       # Si vous voulez utiliser un chemin local spécifique sur votre hôte, commentez la ligne ci-dessus et décommentez la ligne suivante
       # - "N:/My Drive/KESKIA Drive Mlamali/Mantes-Plus-Propre/.inference:/app/.inference"
     container_name: mpp-app
+    depends_on:
+      - mpp-api
+    networks:
+      mpp-network:
 
-volumes:
-  shared_volume:
+networks:
+  mpp-network:
+
+#volumes:
+#  shared_volume:

@@ -1,5 +1,5 @@
 import os
-from src.weights.utils import EGOBLUR_WEIGHTS
+from src.privacy.weights.utils import EGOBLUR_WEIGHTS
 
 
 def _run_command(cmd):

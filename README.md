@@ -1,55 +1,60 @@
-# "Mantes + Propre" 
-
-> Agissons ensemble pour une mantes plus jolie !
-
-![](assets/val_batch2_pred.jpg)
-
-
-## Installation
-
-Après avoir crée un venv, utilisez la commande `pip install -r requirements.txt` pour installer les dépendances.
-
-Ensuite, créez un fichier `.env` à la racine du projet et ajoutez-y les variables suivantes :
-
-```
-REPLICATE_API_TOKEN=your_replicate_api_token # for the generation of cartoon
-BASEROW_DB_API_TOKEN=your_baserow_db_api_token # access to the baserow database
-```
-
-## Lancement
-
-Pour lancer l'application, utilisez la commande `python streamlit run app.py`.
-
-## Structure du projet
-
-## Déploiement
-
-### Construction des images Docker
-
-```shell
-# Construire l'image Docker pour le backend
-docker build -t image-mpp-api -f Dockerfile-api .
-# Construire l'image Docker pour le frontend
-docker build -t image-mpp-app -f Dockerfile-app .
-```
-
-### Démarrage des conteneurs
-
-Démarrer les deux services dans des conteneurs Docker distincts.
-
-```shell
-# --- Démarrer le serveur FastAPI
-echo "Démarrage du serveur FastAPI..."
-docker run --name mpp-api -p 8000:8000 -v shared_volume:/app/.inference image-mpp-api
-#docker run --name mpp-api -p 8000:8000 -v "N:\My Drive\KESKIA Drive Mlamali\Mantes-Plus-Propre\.inference":/app/.inference image-api-mpp
-
-# --- Démarrer le serveur Streamlit
-echo "Démarrage du serveur Streamlit..."
-docker run --name mpp-app -p 8501:8501 -v shared_volume:/app/.inference image-mpp-app
-#docker run --name mpp-app -p 8501:8501 -v "N:\My Drive\KESKIA Drive Mlamali\Mantes-Plus-Propre\.inference":/app/.inference image-app-mpp
+<div align="center">
+    <a href="https://image-mpp-app-ddlzhsitgq-ew.a.run.app">
+        <img src="assets/logo.png" alt="Logo" width="75" height="80"  style="margin-top: 10px">
+    </a>
+    <a href="https://image-mpp-app-ddlzhsitgq-ew.a.run.app"><h1 align="center"  style="padding-top: 0px ; margin-top: 0px">Mantes + Propre</h1></a>
+</div>
 
 
-echo "Les serveurs sont démarrés."
-```
+
+> <p align="center">🌳🌍 Agissons ensemble pour une mantes plus jolie ! 🌳🌍</p>
+
+
+
+## Contexte 🚮
+
+La ville de Mantes-la-Jolie est confrontée à un défi environnemental significatif en raison de la prolifération des déchets sauvages. 
+
+Les déchets sauvages sont définis comme tous les types de détritus jetés ou abandonnés dans des lieux publics, incluant des emballages, des bouteilles, des canettes, et autres résidus qui ne sont pas correctement disposés dans des poubelles ou des centres de recyclage. Ils constituent une source majeure de pollution visuelle et environnementale, dégradant la beauté et la salubrité de la ville. 
+
+L'objectif de notre projet est de mettre en œuvre une solution innovante utilisant le deep learning pour **identifier, classifier et cartographier ces déchets**, facilitant ainsi leur gestion par les services municipaux et améliorant la propreté urbaine.
+
+![](assets/output_yolo.jpg)
+
+## **Fonctionnalités Clés de l'Application**
+
+Notre application est conçue pour être simple et intuitive, permettant aux utilisateurs de signaler les déchets sauvages et de contribuer à la propreté de la ville. 
+
+![](assets/demo_app.gif)
+
+
+Voici les principales fonctionnalités de l'application :
+
+- Les utilisateurs peuvent **uploader des images de déchets** depuis leur smartphone, qui sont automatiquement géolocalisées.
+- **Visualisation d'une carte interactive** montrant la répartition des déchets détectés dans la ville.
+- Nous accordons une attention particulière à la confidentialité : **Floutage automatique des visages et plaques d'immatriculation** pour respecter la confidentialité.
+- **Accès direct à Google Maps** pour localiser précisément les déchets signalés.
+- TODO : **Optimisation de parcours** proposant l'itinéraire le plus efficace pour la collecte des déchets.
+
+
+## Contributeurs
+
+- Mlamali SAID SALIMO
+- Nelly GUEPNANG
+- Jallal KHAIRAOUI
+- Hajar BOULAHYA
+- Cécilia KWAKWA
+
+
+---
+
+<div align="right">
+
+<h2 align="right">Contact</h2>
+
+  <p>📬 mlamali.saidsalimo [ at ] gmail.com 📬</p>
+  <p>Find me on <a href="https://www.linkedin.com/in/mlamalisaidsalimo/">LinkedIn</a> or read me on <a href="https://medium.com/wanabilini">Medium !</a></p>
+
+</div>
 
 

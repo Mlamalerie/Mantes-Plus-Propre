@@ -1,6 +1,7 @@
 data/
 results/
-weights/
+src/detection/weights/archives/*
+src/privacy/weights/archives/*
 *.jit
 runs/
 .inference/

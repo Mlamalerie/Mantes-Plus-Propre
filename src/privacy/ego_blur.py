@@ -351,7 +351,7 @@ def blur_detections_in_image(
     nms_iou_threshold: float,
     output_image_path: str,
     scale_factor_detections: float,
-    save_output_image: bool = False,
+    save_output_image: bool = True,
 ):
     """
     parameter input_image_path: absolute path to the input image
