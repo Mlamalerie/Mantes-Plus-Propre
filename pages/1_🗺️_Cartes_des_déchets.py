@@ -18,7 +18,6 @@ page_logo = Image.open(logo_path)
 st.set_page_config(
     page_title="Mantes + Propre",
     page_icon=page_logo,
-    initial_sidebar_state="expanded",
     layout="wide",
 )
 
@@ -69,8 +68,7 @@ st.markdown("""Retrouvez sur cette carte **les déchets sauvages** signalés par
 
 display_demo_map = st.sidebar.selectbox("Data", ["Données réelles", "Données de démo"],
                                         help="Les données de démo sont des données générées aléatoirement.", index=1)
-map_type_select = st.sidebar.selectbox("Type de carte",
-                                       ["Base", "Heatmap (Carte de chaleur)", "Carte cluster"])
+
 
 with st.spinner("Chargement des données..."):
     if display_demo_map == "Données de démo":
@@ -133,14 +131,15 @@ with st.spinner("Traitement des données..."):
 
 
 # display many kpi
-col_kpi1, col_kpi2, col_kpi3, col_kpi4, _ = st.columns([0.15, 0.15, 0.15, 0.15, 0.3])
+col_kpi1, col_kpi2, col_kpi3, col_kpi4, col_map_type = st.columns([0.15, 0.15, 0.15, 0.15, 0.3])
 len_data = len(df_data)
 col_kpi1.metric(":camera: Signalements total", len_data, help="Nombre total de signalements (photos) de déchets.")
 col_kpi2.metric("Total déchets", df_data['sum_cat_idx_occurences'].sum(),
                 help="Nombre total de déchets signalés et présents sur la carte.")
 col_kpi3.metric("Déchets encombrants", df_data['n_bulky'].sum(),
                 help="Nombre total de déchets encombrants signalés et présents sur la carte.")
-
+map_type_select = col_map_type.selectbox("Type de carte",
+                                       ["Base", "Heatmap (Carte de chaleur)", "Carte cluster"])
 map_container = st.container(border=True)
 # selection type de carte
 
