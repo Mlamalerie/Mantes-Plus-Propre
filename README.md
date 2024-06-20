@@ -41,9 +41,6 @@ Voici les principales fonctionnalités de l'application :
 
 - Mlamali SAID SALIMO
 - Nelly GUEPNANG
-- Jallal KHAIRAOUI
-- Hajar BOULAHYA
-- Cécilia KWAKWA
 
 
 ---
